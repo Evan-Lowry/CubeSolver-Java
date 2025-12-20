@@ -2,134 +2,490 @@ import java.util.ArrayList;
 
 public class Cube {
 
-    private Cubit[] corners = new Cubit[8];
-    private Cubit[] edges = new Cubit[12];
+    private char[] cube = new char[54];
 
     public Cube() {
-        // creates top face
-        this.corners[0] = new Cubit(-1, 1, -1, 0);
-        this.corners[1] = new Cubit(1, 1, -1, 0);
-        this.corners[2] = new Cubit(1, 1, 1, 0);
-        this.corners[3] = new Cubit(-1, 1, 1, 0);
+        char[] orderOfColors = {'W', 'O', 'G', 'R', 'B', 'Y'};
 
-        // creates bottom face
-        this.corners[4] = new Cubit(-1, -1, -1, 0);
-        this.corners[5] = new Cubit(1, -1, -1, 0);
-        this.corners[6] = new Cubit(1, -1, 1, 0);
-        this.corners[7] = new Cubit(-1, -1, 1, 0);
-
-        //creates top face
-        this.edges[0] = new Cubit(0, 1, -1, 0);
-        this.edges[1] = new Cubit(1, 1, 0, 0);
-        this.edges[2] = new Cubit(0, 1, 1, 0);
-        this.edges[3] = new Cubit(-1, 1, 0, 0);
-
-        //creates middle layer
-        this.edges[4] = new Cubit(-1, 0, -1, 0);
-        this.edges[5] = new Cubit(1, 0, -1, 0);
-        this.edges[6] = new Cubit(1, 0, 1, 0);
-        this.edges[7] = new Cubit(-1, 0, 1, 0);
-
-        //creates bottom face
-        this.edges[8] = new Cubit(0, -1, -1, 0);
-        this.edges[9] = new Cubit(1, -1, 0, 0);
-        this.edges[10] = new Cubit(0, -1, 1, 0);
-        this.edges[11] = new Cubit(-1, -1, 0, 0);
-    }
-
-    public void F() {
-        for (Cubit cubit : corners) {
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 9; j++) {
+                this.cube[9*i+j] = orderOfColors[i];
+            }
         }
     }
-
-    public Cubit[] getCorners() {
-        return this.corners;
-    }
-
-    public Cubit[] getEdges() {
-        return this.edges;
-    }
-
 
     public String toString() {
-        char[] corn = new char[24];
-
-        for (int i = 0; i < 8; i++) {
-
-            int[] index = index(this.corners[i]);
-
-            corn[index[0]] = color(i, 0);
-            corn[index[1]] = color(i, 1);
-            corn[index[2]] = color(i, 2);
-        }
 
         String output = "";
 
-        for (char c : corn) {
-            output += c + " ";
+        for (int i = 0; i < 3; i++) {
+            output += "         ";
+            for (int j = 0; j < 3; j++) {
+                output += "[" + this.cube[i*3 + j] + "]";
+            }
+            output += "\n";
+        }
+
+        for (int i = 3; i < 6; i++) {
+            for (int j = 0; j < 4; j++) {
+                for (int k = 0; k < 3; k++) {
+                    output += "[" + this.cube[j*9 + i*3 + k] + "]";
+                }
+            }
+            output += "\n";
+        }
+
+        for (int i = 15; i < 18; i++) {
+            output += "         ";
+            for (int j = 0; j < 3; j++) {
+                output += "[" + this.cube[i*3 + j] + "]";
+            }
+            output += "\n";
         }
 
         return output;
     }
 
-    private char color(int n, int c) {
-        char[] tileColors0 = {'w', 'w', 'w', 'w', 'y', 'y', 'y', 'y'};
-        char[] tileColors1 = {'o', 'b', 'r', 'g', 'b', 'r', 'g', 'o'};
-        char[] tileColors2 = {'b', 'r', 'g', 'o', 'o', 'b', 'r', 'g'};
-
-
-        if (c == 0) {
-            return tileColors0[n];
-        }
-
-        if (c == 1) {
-            return tileColors1[n];
-        }
-
-        if (c == 2) {
-            return tileColors2[n];
-        }
-
-        return 'E';
+    public char[] getCube() {
+        return this.cube;
     }
 
-    private int[] index(Cubit c) {
-        int[] index = new int[3];
+    public void setCube(char[] newCube) {
+        this.cube = newCube;
+    }
 
-        // for top corners of cube
-        if (c.getX() == -1 && c.getY() == 1 && c.getZ() == -1) {
-            return new int[] {1, 48, 34};
+    public void performMoves(String string) {
+        String[] moves = string.split(" ");
+        for (String move : moves) {
+            switch (move) {
+                case "U" -> U();
+                case "U'" -> Up();
+                case "U2" -> { U(); U(); }
+                case "D" -> D();
+                case "D'" -> Dp();
+                case "D2" -> { D(); D(); }
+                case "L" -> L();
+                case "L'" -> Lp();
+                case "L2" -> { L(); L(); }
+                case "R" -> R();
+                case "R'" -> Rp();
+                case "R2" -> { R(); R(); }
+                case "F" -> F();
+                case "F'" -> Fp();
+                case "F2" -> { F(); F(); }
+                case "B" -> B();
+                case "B'" -> Bp();
+                case "B2" -> { B(); B(); }
+                default -> throw new IllegalArgumentException("Invalid move: " + move);
+            }
         }
+    }
 
-        if (c.getX() == 1 && c.getY() == 1 && c.getZ() == -1) {
-            return new int[] {3, 36, 37};
-        }
+    public void F() {
+        char[] newCube = this.cube.clone();
 
-        if (c.getX() == 1 && c.getY() == 1 && c.getZ() == 1) {
-            return new int[] {9, 43, 12};
-        }
+        // Rotate front face clockwise
+        newCube[18] = this.cube[24];
+        newCube[19] = this.cube[21];
+        newCube[20] = this.cube[18];
+        newCube[21] = this.cube[25];
+        newCube[22] = this.cube[22];
+        newCube[23] = this.cube[19];
+        newCube[24] = this.cube[26];
+        newCube[25] = this.cube[23];
+        newCube[26] = this.cube[20];
 
-        if (c.getX() == -1 && c.getY() == 1 && c.getZ() == 1) {
-            return new int[] {7, 10, 54};
-        }
+        // Rotate adjacent edges
+        newCube[6] = this.cube[17];
+        newCube[7] = this.cube[14];
+        newCube[8] = this.cube[11];
 
-        // for bottom corners of cube
-        if (c.getX() == -1 && c.getY() == -1 && c.getZ() == -1) {
-            return new int[] {25, 28, 46};
-        }
+        newCube[27] = this.cube[6];
+        newCube[30] = this.cube[7];
+        newCube[33] = this.cube[8];
 
-        if (c.getX() == 1 && c.getY() == -1 && c.getZ() == -1) {
-            return new int[] {27, 45, 30};
-        }
+        newCube[47] = this.cube[27];
+        newCube[46] = this.cube[30];
+        newCube[45] = this.cube[33];
 
-        if (c.getX() == 1 && c.getY() == -1 && c.getZ() == 1) {
-            return new int[] {21, 18, 43};
-        }
+        newCube[17] = this.cube[47];
+        newCube[14] = this.cube[46];
+        newCube[11] = this.cube[45];
 
-        if (c.getX() == -1 && c.getY() == -1 && c.getZ() == 1) {
-            return new int[] {19, 52, 16};
-        }
+        this.cube = newCube;
+    }
 
-        return index;
+    public void Fp() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate front face counter-clockwise
+        newCube[18] = this.cube[20];
+        newCube[19] = this.cube[23];
+        newCube[20] = this.cube[26];
+        newCube[21] = this.cube[19];
+        newCube[22] = this.cube[22];
+        newCube[23] = this.cube[25];
+        newCube[24] = this.cube[18];
+        newCube[25] = this.cube[21];
+        newCube[26] = this.cube[24];
+
+        // Rotate adjacent edges
+        newCube[6] = this.cube[27];
+        newCube[7] = this.cube[30];
+        newCube[8] = this.cube[33];
+
+        newCube[27] = this.cube[47];
+        newCube[30] = this.cube[46];
+        newCube[33] = this.cube[45];
+
+        newCube[47] = this.cube[17];
+        newCube[46] = this.cube[14];
+        newCube[45] = this.cube[11];
+
+        newCube[17] = this.cube[6];
+        newCube[14] = this.cube[7];
+        newCube[11] = this.cube[8];
+
+        this.cube = newCube;
+    }
+
+    public void B () {
+        char[] newCube = this.cube.clone();
+
+        // Rotate back face clockwise
+        newCube[36] = this.cube[42];
+        newCube[37] = this.cube[39];
+        newCube[38] = this.cube[36];
+        newCube[39] = this.cube[43];
+        newCube[40] = this.cube[40];
+        newCube[41] = this.cube[37];
+        newCube[42] = this.cube[44];
+        newCube[43] = this.cube[41];
+        newCube[44] = this.cube[38];
+
+        // Rotate adjacent edges
+        newCube[2] = this.cube[35];
+        newCube[1] = this.cube[32];
+        newCube[0] = this.cube[29];
+
+        newCube[9] = this.cube[2];
+        newCube[12] = this.cube[1];
+        newCube[15] = this.cube[0];
+
+        newCube[51] = this.cube[9];
+        newCube[52] = this.cube[12];
+        newCube[53] = this.cube[15];
+
+        newCube[35] = this.cube[51];
+        newCube[32] = this.cube[52];
+        newCube[29] = this.cube[53];
+
+        this.cube = newCube;
+    }
+
+    public void Bp() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate back face counter-clockwise
+        newCube[36] = this.cube[38];
+        newCube[37] = this.cube[41];
+        newCube[38] = this.cube[44];
+        newCube[39] = this.cube[37];
+        newCube[40] = this.cube[40];
+        newCube[41] = this.cube[43];
+        newCube[42] = this.cube[36];
+        newCube[43] = this.cube[39];
+        newCube[44] = this.cube[42];
+
+        // Rotate adjacent edges
+        newCube[2] = this.cube[9];
+        newCube[1] = this.cube[12];
+        newCube[0] = this.cube[15];
+
+        newCube[9] = this.cube[51];
+        newCube[12] = this.cube[52];
+        newCube[15] = this.cube[53];
+
+        newCube[51] = this.cube[35];
+        newCube[52] = this.cube[32];
+        newCube[53] = this.cube[29];
+
+        newCube[35] = this.cube[2];
+        newCube[32] = this.cube[1];
+        newCube[29] = this.cube[0];
+
+        this.cube = newCube;
+    }
+
+    public void R() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate right face clockwise
+        newCube[27] = this.cube[33];
+        newCube[28] = this.cube[30];
+        newCube[29] = this.cube[27];
+        newCube[30] = this.cube[34];
+        newCube[31] = this.cube[31];
+        newCube[32] = this.cube[28];
+        newCube[33] = this.cube[35];
+        newCube[34] = this.cube[32];
+        newCube[35] = this.cube[29];
+
+        // Rotate adjacent edges
+        newCube[8] = this.cube[26];
+        newCube[5] = this.cube[23];
+        newCube[2] = this.cube[20];
+
+        newCube[36] = this.cube[8];
+        newCube[39] = this.cube[5];
+        newCube[42] = this.cube[2];
+
+        newCube[53] = this.cube[36];
+        newCube[50] = this.cube[39];
+        newCube[47] = this.cube[42];
+
+        newCube[26] = this.cube[53];
+        newCube[23] = this.cube[50];
+        newCube[20] = this.cube[47];
+
+        this.cube = newCube;
+    }
+
+    public void Rp() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate right face counter-clockwise
+        newCube[27] = this.cube[29];
+        newCube[28] = this.cube[32];
+        newCube[29] = this.cube[35];
+        newCube[30] = this.cube[28];
+        newCube[31] = this.cube[31];
+        newCube[32] = this.cube[34];
+        newCube[33] = this.cube[27];
+        newCube[34] = this.cube[30];
+        newCube[35] = this.cube[33];
+
+        // Rotate adjacent edges
+        newCube[8] = this.cube[36];
+        newCube[5] = this.cube[39];
+        newCube[2] = this.cube[42];
+
+        newCube[36] = this.cube[53];
+        newCube[39] = this.cube[50];
+        newCube[42] = this.cube[47];
+
+        newCube[53] = this.cube[26];
+        newCube[50] = this.cube[23];
+        newCube[47] = this.cube[20];
+
+        newCube[26] = this.cube[8];
+        newCube[23] = this.cube[5];
+        newCube[20] = this.cube[2];
+
+        this.cube = newCube;
+    }
+
+    public void L() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate left face counter-clockwise
+        newCube[9]  = this.cube[15];
+        newCube[10] = this.cube[12];
+        newCube[11] = this.cube[9];
+        newCube[12] = this.cube[16];
+        newCube[13] = this.cube[13];
+        newCube[14] = this.cube[10];
+        newCube[15] = this.cube[17];
+        newCube[16] = this.cube[14];
+        newCube[17] = this.cube[11];
+
+        // Rotate adjacent edges (U <- B <- D <- F <- U)
+        newCube[0] = this.cube[44];
+        newCube[3] = this.cube[41];
+        newCube[6] = this.cube[38];
+
+        newCube[38] = this.cube[51];
+        newCube[41] = this.cube[48];
+        newCube[44] = this.cube[45];
+
+        newCube[51] = this.cube[24];
+        newCube[48] = this.cube[21];
+        newCube[45] = this.cube[18];
+
+        newCube[18] = this.cube[0];
+        newCube[21] = this.cube[3];
+        newCube[24] = this.cube[6];
+
+        this.cube = newCube;
+    }
+
+    public void Lp() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate left face clockwise
+        newCube[9]  = this.cube[11];
+        newCube[10] = this.cube[14];
+        newCube[11] = this.cube[17];
+        newCube[12] = this.cube[10];
+        newCube[13] = this.cube[13];
+        newCube[14] = this.cube[16];
+        newCube[15] = this.cube[9];
+        newCube[16] = this.cube[12];
+        newCube[17] = this.cube[15];
+
+        // Rotate adjacent edges (U -> F -> D -> B -> U)
+        newCube[0] = this.cube[18];
+        newCube[3] = this.cube[21];
+        newCube[6] = this.cube[24];
+
+        newCube[18] = this.cube[45];
+        newCube[21] = this.cube[48];
+        newCube[24] = this.cube[51];
+
+        newCube[45] = this.cube[44];
+        newCube[48] = this.cube[41];
+        newCube[51] = this.cube[38];
+
+        newCube[44] = this.cube[0];
+        newCube[41] = this.cube[3];
+        newCube[38] = this.cube[6];
+
+        this.cube = newCube;
+    }
+
+    public void U() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate upper face clockwise
+        newCube[0] = this.cube[6];
+        newCube[1] = this.cube[3];
+        newCube[2] = this.cube[0];
+        newCube[3] = this.cube[7];
+        newCube[4] = this.cube[4];
+        newCube[5] = this.cube[1];
+        newCube[6] = this.cube[8];
+        newCube[7] = this.cube[5];
+        newCube[8] = this.cube[2];
+
+        // Rotate adjacent edges
+        newCube[18] = this.cube[27];
+        newCube[19] = this.cube[28];
+        newCube[20] = this.cube[29];
+
+        newCube[9] = this.cube[18];
+        newCube[10] = this.cube[19];
+        newCube[11] = this.cube[20];
+
+        newCube[36] = this.cube[9];
+        newCube[37] = this.cube[10];
+        newCube[38] = this.cube[11];
+
+        newCube[27] = this.cube[36];
+        newCube[28] = this.cube[37];
+        newCube[29] = this.cube[38];
+
+        this.cube = newCube;
+    }
+
+    public void Up() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate upper face counter-clockwise
+        newCube[0] = this.cube[2];
+        newCube[1] = this.cube[5];
+        newCube[2] = this.cube[8];
+        newCube[3] = this.cube[1];
+        newCube[4] = this.cube[4];
+        newCube[5] = this.cube[7];
+        newCube[6] = this.cube[0];
+        newCube[7] = this.cube[3];
+        newCube[8] = this.cube[6];
+
+        // Rotate adjacent edges
+        newCube[18] = this.cube[9];
+        newCube[19] = this.cube[10];
+        newCube[20] = this.cube[11];
+
+        newCube[9] = this.cube[36];
+        newCube[10] = this.cube[37];
+        newCube[11] = this.cube[38];
+
+        newCube[36] = this.cube[27];
+        newCube[37] = this.cube[28];
+        newCube[38] = this.cube[29];
+
+        newCube[27] = this.cube[18];
+        newCube[28] = this.cube[19];
+        newCube[29] = this.cube[20];
+
+        this.cube = newCube;
+    }
+
+    public void D() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate down face clockwise (indices 45..53)
+        newCube[45] = this.cube[51];
+        newCube[46] = this.cube[48];
+        newCube[47] = this.cube[45];
+        newCube[48] = this.cube[52];
+        newCube[49] = this.cube[49];
+        newCube[50] = this.cube[46];
+        newCube[51] = this.cube[53];
+        newCube[52] = this.cube[50];
+        newCube[53] = this.cube[47];
+
+        // Rotate adjacent edges (F -> R -> B -> L -> F)
+        newCube[33] = this.cube[24];
+        newCube[34] = this.cube[25];
+        newCube[35] = this.cube[26];
+
+        newCube[42] = this.cube[33];
+        newCube[43] = this.cube[34];
+        newCube[44] = this.cube[35];
+
+        newCube[15] = this.cube[42];
+        newCube[16] = this.cube[43];
+        newCube[17] = this.cube[44];
+
+        newCube[24] = this.cube[15];
+        newCube[25] = this.cube[16];
+        newCube[26] = this.cube[17];
+
+        this.cube = newCube;
+    }
+
+    public void Dp() {
+        char[] newCube = this.cube.clone();
+
+        // Rotate down face counter-clockwise
+        newCube[45] = this.cube[47];
+        newCube[46] = this.cube[50];
+        newCube[47] = this.cube[53];
+        newCube[48] = this.cube[46];
+        newCube[49] = this.cube[49];
+        newCube[50] = this.cube[52];
+        newCube[51] = this.cube[45];
+        newCube[52] = this.cube[48];
+        newCube[53] = this.cube[51];
+
+        // Rotate adjacent edges
+        newCube[33] = this.cube[42];
+        newCube[34] = this.cube[43];
+        newCube[35] = this.cube[44];
+
+        newCube[42] = this.cube[15];
+        newCube[43] = this.cube[16];
+        newCube[44] = this.cube[17];
+
+        newCube[15] = this.cube[24];
+        newCube[16] = this.cube[25];
+        newCube[17] = this.cube[26];
+
+        newCube[24] = this.cube[33];
+        newCube[25] = this.cube[34];
+        newCube[26] = this.cube[35];
+
+        this.cube = newCube;
     }
 }

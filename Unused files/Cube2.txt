@@ -1,0 +1,276 @@
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
+
+// File: Cube.java
+//
+// A compact, fast-to-copy cubie-model Rubik's Cube representation.
+// - Uses the standard cubie-model: 8 corners, 12 edges
+// - State: corner permutation (cp), corner orientation (co: 0..2)
+//          edge permutation (ep), edge orientation (eo: 0..1)
+// - Moves are applied by Move objects that contain permutation + orientation deltas.
+// - Efficient clone, equals, hashCode to use in search (BFS/A*/IDA*/Dijkstra).
+//
+// NOTE: This class is intentionally move-table-agnostic. To use it you should
+// supply Move objects for each basic face-turn (U,R,F,D,L,B) and their 2x/3x
+// variants (or create derived moves by composing the basic ones). Common move
+// tables (Kociemba/CubieCube) can be plugged in by creating Move instances.
+
+
+public final class Cube implements Cloneable {
+    // corners: 0..7, edges: 0..11
+    public final int[] cp = new int[8]; // corner permutation: which corner is at each corner position
+    public final int[] co = new int[8]; // corner orientation: 0..2
+    public final int[] ep = new int[12]; // edge permutation
+    public final int[] eo = new int[12]; // edge orientation: 0..1
+
+    // Construct a solved cube
+    public Cube() {
+        for (int i = 0; i < 8; i++) {
+            cp[i] = i;
+            co[i] = 0;
+        }
+        for (int i = 0; i < 12; i++) {
+            ep[i] = i;
+            eo[i] = 0;
+        }
+    }
+
+    // Copy constructor
+    public Cube(Cube other) {
+        System.arraycopy(other.cp, 0, this.cp, 0, 8);
+        System.arraycopy(other.co, 0, this.co, 0, 8);
+        System.arraycopy(other.ep, 0, this.ep, 0, 12);
+        System.arraycopy(other.eo, 0, this.eo, 0, 12);
+    }
+
+    @Override
+    public Cube clone() {
+        return new Cube(this);
+    }
+
+    // Returns true if cube is solved
+    public boolean isSolved() {
+        for (int i = 0; i < 8; i++) if (cp[i] != i || co[i] != 0) return false;
+        for (int i = 0; i < 12; i++) if (ep[i] != i || eo[i] != 0) return false;
+        return true;
+    }
+
+    // Apply a move. Move's permutation arrays are interpreted as "newIndex -> oldIndex"
+    // so that newState[index] = oldState[ move.perm[index] ], and orientation deltas
+    // are added accordingly (mod 3 for corners, mod 2 for edges).
+    public void applyMove(Move move) {
+        applyMove(move, 1);
+    }
+
+    // Apply move 'times' times (times in {1,2,3})
+    public void applyMove(Move move, int times) {
+        if (times <= 0) return;
+        times = times % 4;
+        for (int t = 0; t < times; t++) {
+            int[] newCp = new int[8];
+            int[] newCo = new int[8];
+            int[] newEp = new int[12];
+            int[] newEo = new int[12];
+
+            for (int i = 0; i < 8; i++) {
+                int oldPos = move.cpPerm[i];
+                newCp[i] = this.cp[oldPos];
+                int added = move.coDelta[i];
+                newCo[i] = (this.co[oldPos] + added) % 3;
+            }
+            for (int i = 0; i < 12; i++) {
+                int oldPos = move.epPerm[i];
+                newEp[i] = this.ep[oldPos];
+                int added = move.eoDelta[i];
+                newEo[i] = (this.eo[oldPos] + added) % 2;
+            }
+
+            System.arraycopy(newCp, 0, this.cp, 0, 8);
+            System.arraycopy(newCo, 0, this.co, 0, 8);
+            System.arraycopy(newEp, 0, this.ep, 0, 12);
+            System.arraycopy(newEo, 0, this.eo, 0, 12);
+        }
+    }
+
+    // Create a list of neighbor states obtained by applying each move in supplied moveList
+    // with the standard 3 variants (quarter, half, three-quarter). Useful for search expansions.
+    public List<Cube> neighbors(List<Move> moveList) {
+        List<Cube> out = new ArrayList<>(moveList.size() * 3);
+        for (Move m : moveList) {
+            Cube c1 = this.clone(); c1.applyMove(m, 1); out.add(c1);
+            Cube c2 = this.clone(); c2.applyMove(m, 2); out.add(c2);
+            Cube c3 = this.clone(); c3.applyMove(m, 3); out.add(c3);
+        }
+        return out;
+    }
+
+    // A very fast (but weak) admissible heuristic lower bound.
+    // It counts how many corner/edge pieces are not in their solved orientation/position.
+    // This value is deliberately simple; you can replace it with stronger heuristics
+    // or pattern-database lookups for better A*/IDA* performance.
+    public int simpleHeuristic() {
+        int misplacedCorners = 0;
+        for (int i = 0; i < 8; i++) {
+            if (cp[i] != i || co[i] != 0) misplacedCorners++;
+        }
+        int misplacedEdges = 0;
+        for (int i = 0; i < 12; i++) {
+            if (ep[i] != i || eo[i] != 0) misplacedEdges++;
+        }
+        // Lower bound: at least one face-turn can fix multiple pieces; we scale down.
+        // This is guaranteed to be a lower bound (never overestimates) because it is a fraction of misplaced pieces.
+        return (int) Math.ceil((misplacedCorners + misplacedEdges) / 8.0);
+    }
+
+    // Equals/hashCode based on full cubie state for use in visited sets.
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Cube)) return false;
+        Cube other = (Cube) o;
+        return Arrays.equals(this.cp, other.cp)
+            && Arrays.equals(this.co, other.co)
+            && Arrays.equals(this.ep, other.ep)
+            && Arrays.equals(this.eo, other.eo);
+    }
+
+    @Override
+    public int hashCode() {
+        int h = Arrays.hashCode(cp);
+        h = h * 31 + Arrays.hashCode(co);
+        h = h * 31 + Arrays.hashCode(ep);
+        h = h * 31 + Arrays.hashCode(eo);
+        return h;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(200);
+        sb.append("CP:").append(Arrays.toString(cp)).append(" CO:").append(Arrays.toString(co))
+          .append(" | EP:").append(Arrays.toString(ep)).append(" EO:").append(Arrays.toString(eo));
+        return sb.toString();
+    }
+
+    public String toShortString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Cube summary\n");
+        sb.append("Solved: ").append(isSolved()).append("\n\n");
+
+        sb.append("Corners (pos : piece, ori):\n");
+        for (int i = 0; i < 8; i++) {
+            sb.append(String.format("%d:%2d,%d", i, cp[i], co[i]));
+            if (i < 7) sb.append("  ");
+        }
+        sb.append("\n\n");
+
+        sb.append("Edges   (pos : piece, ori):\n");
+        for (int i = 0; i < 12; i++) {
+            sb.append(String.format("%2d:%2d,%d", i, ep[i], eo[i]));
+            if (i < 11) sb.append("  ");
+        }
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    public String toCubeString() {
+        // Face indices: U 0..8, R 9..17, F 18..26, D 27..35, L 36..44, B 45..53
+        final char[] colorChar = { 'W', 'R', 'G', 'Y', 'O', 'B' }; // U,R,F,D,L,B
+        final int U = 0, R = 1, F = 2, D = 3, L = 4, B = 5;
+
+        final int[][] cornerFacelet = {
+            {8, 9, 20}, {6, 18, 38}, {0, 36, 47}, {2, 45, 11},
+            {29, 26, 15}, {27, 44, 24}, {33, 53, 42}, {35, 17, 51}
+        };
+        final int[][] edgeFacelet = {
+            {5,10}, {7,19}, {3,37}, {1,46},
+            {32,16}, {28,25}, {30,43}, {34,52},
+            {14,21}, {12,23}, {41,39}, {48,50}
+        };
+        final int[][] cornerColor = {
+            {U, R, F}, {U, F, L}, {U, L, B}, {U, B, R},
+            {D, F, R}, {D, L, F}, {D, B, L}, {D, R, B}
+        };
+        final int[][] edgeColor = {
+            {U, R}, {U, F}, {U, L}, {U, B},
+            {D, R}, {D, F}, {D, L}, {D, B},
+            {R, F}, {L, F}, {L, B}, {R, B}
+        };
+
+        // Initialize with placeholder
+        char[] facelets = new char[54];
+        for (int i = 0; i < 54; i++) facelets[i] = '?';
+
+        // Place corner stickers
+        for (int pos = 0; pos < 8; pos++) {
+            int piece = cp[pos];
+            int ori = co[pos];
+            for (int k = 0; k < 3; k++) {
+                int colorIdx = cornerColor[piece][(k + ori) % 3];
+                facelets[cornerFacelet[pos][k]] = colorChar[colorIdx];
+            }
+        }
+
+        // Place edge stickers
+        for (int pos = 0; pos < 12; pos++) {
+            int piece = ep[pos];
+            int ori = eo[pos];
+            for (int k = 0; k < 2; k++) {
+                int colorIdx = edgeColor[piece][(k + ori) % 2];
+                facelets[edgeFacelet[pos][k]] = colorChar[colorIdx];
+            }
+        }
+
+        // Build a readable net:
+        //       U
+        //   L F R B
+        //       D
+        StringBuilder sb = new StringBuilder(200);
+        // U
+        sb.append("      ").append(facelets[0]).append(' ').append(facelets[1]).append(' ').append(facelets[2]).append('\n');
+        sb.append("      ").append(facelets[3]).append(' ').append(facelets[4]).append(' ').append(facelets[5]).append('\n');
+        sb.append("      ").append(facelets[6]).append(' ').append(facelets[7]).append(' ').append(facelets[8]).append('\n');
+
+        // L F R B (three rows)
+        for (int row = 0; row < 3; row++) {
+            int lBase = 36 + row * 3;
+            int fBase = 18 + row * 3;
+            int rBase = 9  + row * 3;
+            int bBase = 45 + row * 3;
+            sb.append(facelets[lBase]).append(' ').append(facelets[lBase+1]).append(' ').append(facelets[lBase+2]).append("   ");
+            sb.append(facelets[fBase]).append(' ').append(facelets[fBase+1]).append(' ').append(facelets[fBase+2]).append("   ");
+            sb.append(facelets[rBase]).append(' ').append(facelets[rBase+1]).append(' ').append(facelets[rBase+2]).append("   ");
+            sb.append(facelets[bBase]).append(' ').append(facelets[bBase+1]).append(' ').append(facelets[bBase+2]).append('\n');
+        }
+
+        // D
+        sb.append("      ").append(facelets[27]).append(' ').append(facelets[28]).append(' ').append(facelets[29]).append('\n');
+        sb.append("      ").append(facelets[30]).append(' ').append(facelets[31]).append(' ').append(facelets[32]).append('\n');
+        sb.append("      ").append(facelets[33]).append(' ').append(facelets[34]).append(' ').append(facelets[35]).append('\n');
+
+        return sb.toString();
+    }
+
+    // Use the top-level Move class (Move.java) instead of an inner Move class.
+    // Helper: apply a permutation directly (for quick testing)
+    // The semantics match applyMove: perm arrays are newIndex -> oldIndex.
+    public void applyPermutations(int[] cpPerm, int[] coDelta, int[] epPerm, int[] eoDelta) {
+        applyMove(new Move(cpPerm, coDelta, epPerm, eoDelta));
+    }
+
+    // Example: how to create a Move for the identity (no-op) move.
+    public static Move identityMove() {
+        int[] cpPerm = new int[8]; int[] coDelta = new int[8];
+        int[] epPerm = new int[12]; int[] eoDelta = new int[12];
+        for (int i = 0; i < 8; i++) { cpPerm[i] = i; coDelta[i] = 0; }
+        for (int i = 0; i < 12; i++) { epPerm[i] = i; eoDelta[i] = 0; }
+        return new Move(cpPerm, coDelta, epPerm, eoDelta);
+    }
+
+    // Usage guidance:
+    // - Build Move objects for U, R, F, D, L, B (and/or their variants) using known cubie move tables
+    //   (for example from Kociemba's CubieCube tables) and store them in a List<Move>.
+    // - Use neighbors(moveList) to expand states in BFS/A*/IDA*.
+    // - Use simpleHeuristic() or replace with a stronger heuristic (pattern databases) for A* / IDA*.
+}
