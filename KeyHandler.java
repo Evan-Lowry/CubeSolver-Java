@@ -22,16 +22,24 @@ public class KeyHandler implements KeyListener{
         // used for the Microsoft virtual desktop which only detects key typed
 
         char keyChar = Character.toLowerCase(e.getKeyChar());
-        if (keyChar == 'j') {
-            CubeUI.performMoves("U");
-        } else if (keyChar == 'f') {
-            CubeUI.performMoves("U'");
-        } else if (keyChar == 'r') {
-            reset = true;
-        } else if (keyChar == ' ') {
-            spacePressed = true;
-        } else if (keyChar == 'q') {
-            CubeUI.exit();
+
+        switch (keyChar) {
+            case 'j' -> CubeUI.performMoves("U");
+            case 'f' -> CubeUI.performMoves("U'");
+            case 'h' -> CubeUI.performMoves("F");
+            case 'g' -> CubeUI.performMoves("F'");
+            case 'k' -> CubeUI.performMoves("R'");
+            case 'd' -> CubeUI.performMoves("L");
+            case 'l' -> CubeUI.performMoves("D'");
+            case 's' -> CubeUI.performMoves("D");
+            case 'i' -> CubeUI.performMoves("R");
+            case 'e' -> CubeUI.performMoves("L'");
+            case 'o' -> CubeUI.performMoves("B'");
+            case 'w' -> CubeUI.performMoves("B");
+            case 'r' -> reset = true;
+            case ' ' -> spacePressed = true;
+            case 'q' -> CubeUI.exit();
+            default -> {}
         }
     }
 

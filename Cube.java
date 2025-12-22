@@ -54,6 +54,18 @@ public class Cube {
         this.cube = newCube;
     }
 
+    public boolean isSolved() {
+        for (int i = 0; i < 6; i++) {
+            char color = this.cube[i * 9 + 4]; // center piece color
+            for (int j = 0; j < 9; j++) {
+                if (this.cube[i * 9 + j] != color) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public void performMoves(String string) {
         String[] moves = string.split(" ");
         for (String move : moves) {

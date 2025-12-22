@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 
 public class CubeUI extends JPanel {
     private static Cube cube;
+    private static JFrame frame;
 
     // creates a drawing object to handle all drawing of objects to screen
     static Drawing drawing = new Drawing();
@@ -34,20 +35,33 @@ public class CubeUI extends JPanel {
         this.setFocusable(true);
         this.setVisible(true);
         this.setFocusTraversalKeysEnabled(false);
+        showWindow(cube);
     }
-
     private static void refresh() {
-        SwingUtilities.invokeLater(() -> {
-            CubeUI ui = new CubeUI(cube);
-            ui.repaint();
-            ui.setVisible(true);
-        });
+        if (frame != null) {
+            frame.repaint();
+        }
     }
-
     public static void showWindow(Cube cube) {
         SwingUtilities.invokeLater(() -> {
-            CubeUI ui = new CubeUI(cube);
-            ui.setVisible(true);
+            if (frame == null) {
+                CubeUI ui = new CubeUI(cube);
+                frame = new JFrame("Cube Solver");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setContentPane(ui);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+                // removes top bar
+                // frame.setUndecorated(true);
+                // adds the GamePanel to the frame so you can see whats happening
+                // frame.add(gamePanel);
+                // frame.requestFocusInWindow();
+                // frame.setFocusTraversalKeysEnabled(false);
+            } else {
+                CubeUI.cube = cube;
+                frame.repaint();
+            }
         });
     }
 
@@ -69,6 +83,7 @@ public class CubeUI extends JPanel {
 
     public static void performMoves(String move) {
         cube.performMoves(move);
+        refresh();
     }
 
     public static void exit() {
