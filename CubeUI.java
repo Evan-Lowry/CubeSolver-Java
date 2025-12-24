@@ -16,17 +16,19 @@ public class CubeUI extends JPanel {
     // creates a drawing object to handle all drawing of objects to screen
     static Drawing drawing = new Drawing();
     // used to store the resolution of the window measured as a percentage of 1920 x 1080
-    static float fullscreen = (float) 1;
+    static float fullscreen = (float) 0.5;
     // sets the resolution variables in accordance with the fullscreen variables
-    static int windowHeight = (int)(fullscreen*956);
-    static int windowWidth = (int)(fullscreen*1470);
+    static final int WINDOW_HEIGHT = (int)(550);
+    static final int WINDOW_WIDTH = (int)(700);
+    // static final int WINDOW_HEIGHT = (int)(fullscreen*956);
+    // static final int WINDOW_WIDTH = (int)(fullscreen*1470);
     // creates a KeyHandler to read and store key inputs
     static KeyHandler keyH = new KeyHandler();
 
     public CubeUI() {
         cube = Main.cube;
         // sets size of window
-        this.setPreferredSize(new Dimension(windowWidth, windowHeight));
+        this.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         // sets background color to black
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
@@ -52,14 +54,9 @@ public class CubeUI extends JPanel {
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setContentPane(ui);
                 frame.pack();
-                frame.setLocationRelativeTo(null);
+                frame.setLocation(0, 0);
                 frame.setVisible(true);
-                // removes top bar
-                // frame.setUndecorated(true);
-                // adds the GamePanel to the frame so you can see whats happening
-                // frame.add(gamePanel);
-                // frame.requestFocusInWindow();
-                // frame.setFocusTraversalKeysEnabled(false);
+                frame.setResizable(false);
             } else {
                 CubeUI.cube = cube;
                 frame.repaint();

@@ -2,13 +2,13 @@ import java.util.ArrayList;
 
 public class CubeSolver {
 
-    private int stateCounter = 0;
+    private long stateCounter = 0L;
     private ArrayList<Integer> moves = new ArrayList<>();
 
     public CubeSolver() {
     }
 
-    public int getStateCounter() {
+    public long getStateCounter() {
         return stateCounter;
     }
 
@@ -69,35 +69,50 @@ public class CubeSolver {
             if (solveCube(state, depth, -1)) {
                 return true;
             }
-            System.out.println("Depth " + depth + " completed, states explored: " + stateCounter);
         }
         return false;
     }
 
     public boolean solveCube(Cube state, int depth, int lastMove) {
 
-        if (stateCounter%1000000 == 0) {
-            CubeUI.refresh();
-        }
-
-
         // 1. BASE CASE: If the cube is solved, we are done
-        if (state.isSolved()) {
-            return true;
-        }
+        if (state.isSolved()) return true;
 
         // 2. STOPPING CONDITION: Stop if we hit the maximum allowed search depth
-        if (depth <= 0) {
-            return false;
-        }
+        if (depth <= 0) return false;
 
         // 3. EXPLORE CHOICES: Iterate through all possible moves
         for (int i = 0; i < 12; i++) {
 
             // Avoid immediately reversing the previous move
             // (i ^ 1) flips the last bit to get the inverse move index (e.g., 0 <-> 1, 2 <-> 3, etc.)
-            if (lastMove != -1 && i == (lastMove ^ 1)) {
+            if (moves.size() > 0 && moves.get(moves.size() - 1) == (i ^ 1)) {
                 continue;
+            }
+
+            if (moves.size() >= 2) {
+                int size = moves.size();
+                // Prevent patterns like "X X X'" or "X X' X" or "X' X X"
+                int last = moves.get(size - 1);
+                int secondLast = moves.get(size - 2);
+                // Prevent three moves on the same face in a row (e.g., X X X)
+                if ((last / 2 == i / 2) && (secondLast / 2 == i / 2)) {
+                    continue;
+                }
+                // Prevent patterns like "X X' X" or "X' X X"
+                if ((secondLast == (i ^ 1) && last == i) || (secondLast == i && last == (i ^ 1))) {
+                    continue;
+                }
+            }
+
+            int face = i / 2;
+            if (moves.size() > 0) {
+                int lastFace = moves.get(moves.size() - 1) / 2;
+                // If this move is on the face opposite the previous face, enforce a canonical order
+                // to avoid exploring both orders (e.g., L R and R L). Allow only the smaller-face-first.
+                if (lastFace == (face ^ 1) && face > lastFace) {
+                    continue;
+                }
             }
 
             // Apply the choice

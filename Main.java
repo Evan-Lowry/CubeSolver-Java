@@ -8,15 +8,22 @@ public class Main {
     public static void main(String[] args) {
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves("U R D L B U' R' L"); // example scramble
+        cube.performMoves("L F' L' U' L U F U' L'"); // example scramble
     }
 
     public static void solve() {
         CubeSolver solver = new CubeSolver();
         System.out.println("Starting to solve the cube...");
-        System.out.println(solver.solveAnyCube(cube, 8) ? "Cube solved!" : "Could not solve the cube within the given depth.");
-        System.out.println("Total states explored: " + solver.getStateCounter());
-        System.out.println("Moves taken: " + solver.getMoves());
+        long startTime = System.currentTimeMillis();
+        boolean solved = solver.solveAnyCube(cube, 9);
+        long endTime = System.currentTimeMillis();
+        System.out.println("Solving took " + (endTime - startTime)/1000.0 + " s");
+        if (solved) {
+            System.out.println("Total states explored: " + solver.getStateCounter());
+            System.out.println("Moves taken: " + solver.getMoves());
+        } else {
+            System.out.println("Could not solve the cube within the given depth.");
+        }
 
         CubeUI.refresh();
     }
