@@ -12,27 +12,57 @@ public class CubeSolver {
         return stateCounter;
     }
 
-    public String getMoves() {
-        String listOfMoves = "";
-        for (int move : moves) {
-            switch (move) {
-                case 0 -> listOfMoves += "U ";
-                case 1 -> listOfMoves += "U' ";
-                case 2 -> listOfMoves += "D ";
-                case 3 -> listOfMoves += "D' ";
-                case 4 -> listOfMoves += "L ";
-                case 5 -> listOfMoves += "L' ";
-                case 6 -> listOfMoves += "R ";
-                case 7 -> listOfMoves += "R' ";
-                case 8 -> listOfMoves += "F ";
-                case 9 -> listOfMoves += "F' ";
-                case 10 -> listOfMoves += "B ";
-                case 11 -> listOfMoves += "B' ";
-                default -> {}
+        public String getMoves() {
+        StringBuilder sb = new StringBuilder();
+        String[] faces = {"U", "D", "L", "R", "F", "B"};
+        int i = 0;
+        while (i < moves.size()) {
+            int first = moves.get(i);
+            int face = first / 2; // 0..5
+            int j = i;
+            int net = 0; // net quarter-turns clockwise
+            // accumulate consecutive moves on the same face
+            while (j < moves.size() && moves.get(j) / 2 == face) {
+                int mv = moves.get(j);
+                net += (mv % 2 == 0) ? 1 : -1; // even = clockwise, odd = counter-clockwise
+                j++;
             }
+            net = ((net % 4) + 4) % 4; // normalize to 0..3
+            if (net == 1) {
+                sb.append(faces[face]).append(" ");
+            } else if (net == 2) {
+                sb.append(faces[face]).append("2 ");
+            } else if (net == 3) {
+                sb.append(faces[face]).append("' ");
+            }
+            i = j;
         }
-        return listOfMoves.trim();
+        return sb.toString().trim();
     }
+
+
+
+    // public String getMoves() {
+    //     String listOfMoves = "";
+    //     for (int move : moves) {
+    //         switch (move) {
+    //             case 0 -> listOfMoves += "U ";
+    //             case 1 -> listOfMoves += "U' ";
+    //             case 2 -> listOfMoves += "D ";
+    //             case 3 -> listOfMoves += "D' ";
+    //             case 4 -> listOfMoves += "L ";
+    //             case 5 -> listOfMoves += "L' ";
+    //             case 6 -> listOfMoves += "R ";
+    //             case 7 -> listOfMoves += "R' ";
+    //             case 8 -> listOfMoves += "F ";
+    //             case 9 -> listOfMoves += "F' ";
+    //             case 10 -> listOfMoves += "B ";
+    //             case 11 -> listOfMoves += "B' ";
+    //             default -> {}
+    //         }
+    //     }
+    //     return listOfMoves.trim();
+    // }
 
     public boolean solveAnyCube(Cube state, int maxDepth) {
         for (int depth = 1; depth <= maxDepth; depth++) {
