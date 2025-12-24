@@ -37,11 +37,13 @@ public class CubeUI extends JPanel {
         this.setFocusTraversalKeysEnabled(false);
         showWindow(cube);
     }
-    private static void refresh() {
+
+    public static void refresh() {
         if (frame != null) {
             frame.repaint();
         }
     }
+
     public static void showWindow(Cube cube) {
         SwingUtilities.invokeLater(() -> {
             if (frame == null) {
