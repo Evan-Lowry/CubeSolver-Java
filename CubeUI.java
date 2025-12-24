@@ -23,8 +23,8 @@ public class CubeUI extends JPanel {
     // creates a KeyHandler to read and store key inputs
     static KeyHandler keyH = new KeyHandler();
 
-    public CubeUI(Cube cube) {
-        this.cube = cube;
+    public CubeUI() {
+        cube = Main.cube;
         // sets size of window
         this.setPreferredSize(new Dimension(windowWidth, windowHeight));
         // sets background color to black
@@ -35,7 +35,7 @@ public class CubeUI extends JPanel {
         this.setFocusable(true);
         this.setVisible(true);
         this.setFocusTraversalKeysEnabled(false);
-        showWindow(cube);
+        showWindow(Main.cube);
     }
 
     public static void refresh() {
@@ -47,7 +47,7 @@ public class CubeUI extends JPanel {
     public static void showWindow(Cube cube) {
         SwingUtilities.invokeLater(() -> {
             if (frame == null) {
-                CubeUI ui = new CubeUI(cube);
+                CubeUI ui = new CubeUI();
                 frame = new JFrame("Cube Solver");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setContentPane(ui);

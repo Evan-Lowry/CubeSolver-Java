@@ -36,8 +36,8 @@ public class KeyHandler implements KeyListener{
             case 'e' -> CubeUI.performMoves("L'");
             case 'o' -> CubeUI.performMoves("B'");
             case 'w' -> CubeUI.performMoves("B");
-            case 'r' -> reset = true;
-            case ' ' -> spacePressed = true;
+            case 'r' -> Main.reset();
+            case ' ' -> Main.solve();
             case 'q' -> CubeUI.exit();
             default -> {}
         }
