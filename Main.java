@@ -9,14 +9,14 @@ public class Main {
     public static void main(String[] args) {
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves("L F' L' U'"); // example scramble
+        cube.performMoves("L F' L' U' L U F U' L'"); // example scramble
     }
 
     public static void solve() {
         solver = new CubeSolver();
         System.out.println("Starting to solve the cube...");
         long startTime = System.currentTimeMillis();
-        boolean solved = solver.solveAnyCube(cube, 9);
+        boolean solved = solver.solveAnyCube(cube, 10);
         long endTime = System.currentTimeMillis();
         System.out.println("Solving took " + (endTime - startTime)/1000.0 + " s");
         if (solved) {

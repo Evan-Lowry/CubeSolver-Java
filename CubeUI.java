@@ -76,7 +76,7 @@ public class CubeUI extends JPanel {
         g2.dispose();
     }
 
-    public static char[] getCube() {
+    public static byte[] getCube() {
         return cube.getCube();
     }
 

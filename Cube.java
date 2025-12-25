@@ -2,14 +2,13 @@ import java.util.ArrayList;
 
 public class Cube {
 
-    private char[] cube = new char[54];
+    private byte[] cube = new byte[54];
 
     public Cube() {
-        char[] orderOfColors = {'W', 'O', 'G', 'R', 'B', 'Y'};
 
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 9; j++) {
-                this.cube[9*i+j] = orderOfColors[i];
+                this.cube[9*i+j] = (byte) (i);
             }
         }
     }
@@ -46,17 +45,17 @@ public class Cube {
         return output;
     }
 
-    public char[] getCube() {
+    public byte[] getCube() {
         return this.cube;
     }
 
-    public void setCube(char[] newCube) {
+    public void setCube(byte[] newCube) {
         this.cube = newCube;
     }
 
     public boolean isSolved() {
         for (int i = 0; i < 6; i++) {
-            char color = this.cube[i * 9 + 4]; // center piece color
+            byte color = this.cube[i * 9 + 4]; // center piece color
             for (int j = 0; j < 9; j++) {
                 if (this.cube[i * 9 + j] != color) {
                     return false;
@@ -128,7 +127,7 @@ public class Cube {
     }
 
     public void F() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate front face clockwise
         newCube[18] = this.cube[24];
@@ -162,7 +161,7 @@ public class Cube {
     }
 
     public void Fp() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate front face counter-clockwise
         newCube[18] = this.cube[20];
@@ -196,7 +195,7 @@ public class Cube {
     }
 
     public void B () {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate back face clockwise
         newCube[36] = this.cube[42];
@@ -230,7 +229,7 @@ public class Cube {
     }
 
     public void Bp() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate back face counter-clockwise
         newCube[36] = this.cube[38];
@@ -264,7 +263,7 @@ public class Cube {
     }
 
     public void R() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate right face clockwise
         newCube[27] = this.cube[33];
@@ -298,7 +297,7 @@ public class Cube {
     }
 
     public void Rp() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate right face counter-clockwise
         newCube[27] = this.cube[29];
@@ -332,7 +331,7 @@ public class Cube {
     }
 
     public void L() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate left face counter-clockwise
         newCube[9]  = this.cube[15];
@@ -366,7 +365,7 @@ public class Cube {
     }
 
     public void Lp() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate left face clockwise
         newCube[9]  = this.cube[11];
@@ -400,7 +399,7 @@ public class Cube {
     }
 
     public void U() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate upper face clockwise
         newCube[0] = this.cube[6];
@@ -434,7 +433,7 @@ public class Cube {
     }
 
     public void Up() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate upper face counter-clockwise
         newCube[0] = this.cube[2];
@@ -468,7 +467,7 @@ public class Cube {
     }
 
     public void D() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate down face clockwise (indices 45..53)
         newCube[45] = this.cube[51];
@@ -502,7 +501,7 @@ public class Cube {
     }
 
     public void Dp() {
-        char[] newCube = this.cube.clone();
+        byte[] newCube = this.cube.clone();
 
         // Rotate down face counter-clockwise
         newCube[45] = this.cube[47];
@@ -533,5 +532,11 @@ public class Cube {
         newCube[26] = this.cube[35];
 
         this.cube = newCube;
+    }
+
+    public Cube copy() {
+        Cube newCube = new Cube();
+        newCube.setCube(this.cube.clone());
+        return newCube;
     }
 }
