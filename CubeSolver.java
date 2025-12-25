@@ -1,18 +1,18 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CubeSolver {
 
     private long stateCounter = 0L;
-    private ArrayList<Integer> moves = new ArrayList<>();
-
-    public CubeSolver() {
-    }
+    private IntStack moves = new IntStack();
+    private ArrayList<Cube> states = new ArrayList<>();
 
     public long getStateCounter() {
         return stateCounter;
     }
 
-        public String getMoves() {
+    public String getMoves() {
         StringBuilder sb = new StringBuilder();
         String[] faces = {"U", "D", "L", "R", "F", "B"};
         int i = 0;
@@ -40,32 +40,9 @@ public class CubeSolver {
         return sb.toString().trim();
     }
 
-
-
-    // public String getMoves() {
-    //     String listOfMoves = "";
-    //     for (int move : moves) {
-    //         switch (move) {
-    //             case 0 -> listOfMoves += "U ";
-    //             case 1 -> listOfMoves += "U' ";
-    //             case 2 -> listOfMoves += "D ";
-    //             case 3 -> listOfMoves += "D' ";
-    //             case 4 -> listOfMoves += "L ";
-    //             case 5 -> listOfMoves += "L' ";
-    //             case 6 -> listOfMoves += "R ";
-    //             case 7 -> listOfMoves += "R' ";
-    //             case 8 -> listOfMoves += "F ";
-    //             case 9 -> listOfMoves += "F' ";
-    //             case 10 -> listOfMoves += "B ";
-    //             case 11 -> listOfMoves += "B' ";
-    //             default -> {}
-    //         }
-    //     }
-    //     return listOfMoves.trim();
-    // }
-
     public boolean solveAnyCube(Cube state, int maxDepth) {
         for (int depth = 1; depth <= maxDepth; depth++) {
+            
             if (solveCube(state, depth, -1)) {
                 return true;
             }
@@ -118,9 +95,11 @@ public class CubeSolver {
             // Apply the choice
             state.applyMove(i);
 
-            moves.add(i);
+            moves.push(i);
 
             stateCounter++;
+
+            // seen.put(state.getString(), stateCounter);
 
             // Recurse: Move to the next level
             if (solveCube(state, depth - 1, i)) {
@@ -130,7 +109,7 @@ public class CubeSolver {
             // 4. BACKTRACK: Undo the choice to return to the previous state
             state.undoMove(i);
 
-            moves.remove(moves.size() - 1);
+            moves.removeLast();
         }
 
         return false;

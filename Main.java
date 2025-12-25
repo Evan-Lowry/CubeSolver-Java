@@ -5,14 +5,15 @@ public class Main {
 
     public static CubeUI gamePanel;
     public static Cube cube;
+    public static CubeSolver solver;
     public static void main(String[] args) {
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves("L F' L' U' L U F U' L'"); // example scramble
+        cube.performMoves("L F' L' U'"); // example scramble
     }
 
     public static void solve() {
-        CubeSolver solver = new CubeSolver();
+        solver = new CubeSolver();
         System.out.println("Starting to solve the cube...");
         long startTime = System.currentTimeMillis();
         boolean solved = solver.solveAnyCube(cube, 9);
