@@ -53,6 +53,19 @@ public class Cube {
         this.cube = newCube;
     }
 
+    public int getHeuristic() {
+        int misplaced = 0;
+        for (int i = 0; i < 6; i++) {
+            byte color = this.cube[i * 9 + 4]; // center piece color
+            for (int j = 0; j < 9; j++) {
+                if (this.cube[i * 9 + j] != color) {
+                    misplaced++;
+                }
+            }
+        }
+        return misplaced;
+    }
+
     public boolean isSolved() {
         for (int i = 0; i < 6; i++) {
             byte color = this.cube[i * 9 + 4]; // center piece color

@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves("L F' L' U' L U F U' L'"); // example scramble
+        cube.performMoves("L F' L'"); // example scramble
     }
 
     public static void solve() {
@@ -20,7 +20,7 @@ public class Main {
         long endTime = System.currentTimeMillis();
         System.out.println("Solving took " + (endTime - startTime)/1000.0 + " s");
         if (solved) {
-            System.out.println("Total states explored: " + solver.getStateCounter());
+            System.out.println("Total states explored: " + formatNumber(solver.getStateCounter()));
             System.out.println("Moves taken: " + solver.getMoves());
         } else {
             System.out.println("Could not solve the cube within the given depth.");
@@ -34,5 +34,15 @@ public class Main {
     }
 
     public static void reset() {
+    }
+
+    private static String formatNumber(long number) {
+        if (number < 1000) {
+            return Long.toString(number);
+        }
+        int exp = (int) (Math.log10(number) / 3);
+        char suffix = "kMGTPE".charAt(exp - 1);
+        double scaled = number / Math.pow(1000, exp);
+        return String.format("%.1f%c", scaled, suffix);
     }
 }

@@ -6,9 +6,6 @@ public class CubeSolver {
 
     private long stateCounter = 0L;
     private IntStack moves = new IntStack();
-    private ArrayList<byte[]> states;
-    private ArrayList<IntStack> moveLists;
-    private Cube placeHolderCube = new Cube();
 
     public long getStateCounter() {
         return stateCounter;
@@ -43,77 +40,13 @@ public class CubeSolver {
     }
 
     public boolean solveAnyCube(Cube cube, int maxDepth) {
-        this.states = new ArrayList<>();
-        this.states.add(cube.getCube().clone());
-        this.moveLists = new ArrayList<>();
-        this.moveLists.add(new IntStack());
 
         for (int depth = 1; depth <= maxDepth; depth++) {
-            ArrayList<byte[]> newStates = new ArrayList<>();
-            ArrayList<IntStack> newMoveLists = new ArrayList<>();
-            for (int i = 0; i < this.states.size(); i++) {
-                byte[] s = this.states.get(i);
-                IntStack ml = this.moveLists.get(i);
-                if (makeMove(s, ml, newStates, newMoveLists)) {
-                    this.moves = ml;
-                    return true;
-                }
-            }
-            this.states = newStates;
-            this.moveLists = newMoveLists;
-        }
-
-        for (int i = 0; i < this.states.size(); i++) {
-            byte[] ns = this.states.get(i);
-            IntStack nml = this.moveLists.get(i);
-            if (isSolved(ns)) {
-                this.moves = nml;
+            if (solveCube(cube, depth)) {
                 return true;
             }
         }
         return false;
-    }
-
-    public boolean makeMove(byte[] state, IntStack moveList, ArrayList<byte[]> newStates, ArrayList<IntStack> newMoveLists) {
-
-        // 1. BASE CASE: If the cube is solved, we are done
-        if (isSolved(state)) return true;
-
-        // 3. EXPLORE CHOICES: Iterate through all possible moves
-        for (int i = 0; i < 12; i++) {
-
-            byte[] newState = state.clone();
-            applyMove(newState, i);
-
-            IntStack newMoveList = moveList.copy();
-            newMoveList.push(i);
-
-            newStates.add(newState);
-            newMoveLists.add(newMoveList);
-
-            stateCounter++;
-        }
-
-        return false;
-    }
-
-    private boolean isSolved(byte[] cube) {
-        for (int face = 0; face < 6; face++) {
-            byte color = cube[face * 9 + 4]; // center piece color
-            for (int i = 0; i < 9; i++) {
-                if (cube[face * 9 + i] != color) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private void applyMove(byte[] cube, int move) {
-        placeHolderCube.setCube(cube);
-        placeHolderCube.applyMove(move);
-        byte[] newCube = placeHolderCube.getCube();
-        System.arraycopy(newCube, 0, cube, 0, 54);
     }
 
     public boolean solveCube(Cube state, int depth) {
@@ -158,23 +91,25 @@ public class CubeSolver {
                 }
             }
 
+            int heuristic = state.getHeuristic();
+
             // Apply the choice
             state.applyMove(i);
-
             moves.push(i);
-
             stateCounter++;
 
-            // seen.put(state.getString(), stateCounter);
+            int newHeuristic = state.getHeuristic();
 
-            // Recurse: Move to the next level
-            if (solveCube(state, depth - 1)) {
-                return true;
+            if (true) {
+                // Continue exploring this path
+                // Recurse: Move to the next level
+                if (solveCube(state, depth - 1)) {
+                    return true;
+                }
             }
 
             // 4. BACKTRACK: Undo the choice to return to the previous state
             state.undoMove(i);
-
             moves.removeLast();
         }
 
