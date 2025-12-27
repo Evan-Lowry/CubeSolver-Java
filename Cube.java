@@ -1,62 +1,112 @@
+import java.util.ArrayList;
+
 public class Cube {
 
-    private byte[][] corners = new byte[8][2];
-    private byte[][] edges = new byte[12][2];
+    private byte[] cube = new byte[54];
 
     public Cube() {
 
-        for (byte i = 0; i < 8; i++) {
-            this.corners[i] = new byte[] {i, 0};
-        }
-
-        for (byte i = 0; i < 12; i++) {
-            this.edges[i] = new byte[] {i, 0};
-        }
-    }
-
-    public byte[][] getCorners() {
-        return this.corners;
-    }
-
-    public byte[][] getEdges() {
-        return this.edges;
-    }
-
-    public void performMoves(String moves) {
-
-        if (moves == null || moves.isEmpty()) {
-            return;
-        }
-
-        String[] moveList = moves.split(" ");
-
-        for (String move : moveList) {
-            switch (move) {
-                case "F" -> F();
-                case "F'" -> Fp();
-                case "F2" -> F2();
-                case "B" -> B();
-                case "B'" -> Bp();
-                case "B2" -> B2();
-                case "R" -> R();
-                case "R'" -> Rp();
-                case "R2" -> R2();
-                case "L" -> L();
-                case "L'" -> Lp();
-                case "L2" -> L2();
-                case "U" -> U();
-                case "U'" -> Up();
-                case "U2" -> U2();
-                case "D" -> D();
-                case "D'" -> Dp();
-                case "D2" -> D2();
-                default -> System.out.println("Invalid move: " + move);
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 9; j++) {
+                this.cube[9*i+j] = (byte) (i);
             }
         }
     }
 
-    public void applyMove(int move) {
-        switch (move) {
+    public String toString() {
+
+        String output = "";
+
+        for (int i = 0; i < 3; i++) {
+            output += "         ";
+            for (int j = 0; j < 3; j++) {
+                output += "[" + this.cube[i*3 + j] + "]";
+            }
+            output += "\n";
+        }
+
+        for (int i = 3; i < 6; i++) {
+            for (int j = 0; j < 4; j++) {
+                for (int k = 0; k < 3; k++) {
+                    output += "[" + this.cube[j*9 + i*3 + k] + "]";
+                }
+            }
+            output += "\n";
+        }
+
+        for (int i = 15; i < 18; i++) {
+            output += "         ";
+            for (int j = 0; j < 3; j++) {
+                output += "[" + this.cube[i*3 + j] + "]";
+            }
+            output += "\n";
+        }
+
+        return output;
+    }
+
+    public byte[] getCube() {
+        return this.cube;
+    }
+
+    public void setCube(byte[] newCube) {
+        this.cube = newCube;
+    }
+
+    public int getHeuristic() {
+        int misplaced = 0;
+        for (int i = 0; i < 6; i++) {
+            byte color = this.cube[i * 9 + 4]; // center piece color
+            for (int j = 0; j < 9; j++) {
+                if (this.cube[i * 9 + j] != color) {
+                    misplaced++;
+                }
+            }
+        }
+        return misplaced;
+    }
+
+    public boolean isSolved() {
+        for (int i = 0; i < 6; i++) {
+            byte color = this.cube[i * 9 + 4]; // center piece color
+            for (int j = 0; j < 9; j++) {
+                if (this.cube[i * 9 + j] != color) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public void performMoves(String string) {
+        String[] moves = string.split(" ");
+        for (String move : moves) {
+            switch (move) {
+                case "U" -> U();
+                case "U'" -> Up();
+                case "U2" -> { U(); U(); }
+                case "D" -> D();
+                case "D'" -> Dp();
+                case "D2" -> { D(); D(); }
+                case "L" -> L();
+                case "L'" -> Lp();
+                case "L2" -> { L(); L(); }
+                case "R" -> R();
+                case "R'" -> Rp();
+                case "R2" -> { R(); R(); }
+                case "F" -> F();
+                case "F'" -> Fp();
+                case "F2" -> { F(); F(); }
+                case "B" -> B();
+                case "B'" -> Bp();
+                case "B2" -> { B(); B(); }
+                default -> throw new IllegalArgumentException("Invalid move: " + move);
+            }
+        }
+    }
+
+    public void applyMove(int i) {
+        switch (i) {
             case 0 -> U();
             case 1 -> Up();
             case 2 -> D();
@@ -69,12 +119,11 @@ public class Cube {
             case 9 -> Fp();
             case 10 -> B();
             case 11 -> Bp();
-            default -> throw new IllegalArgumentException("Invalid move: " + move);
         }
     }
 
-    public void undoMove(int move) {
-        switch (move) {
+    public void undoMove(int i) {
+        switch (i) {
             case 0 -> Up();
             case 1 -> U();
             case 2 -> Dp();
@@ -87,479 +136,406 @@ public class Cube {
             case 9 -> F();
             case 10 -> Bp();
             case 11 -> B();
-            default -> throw new IllegalArgumentException("Invalid move: " + move);
-        }
-    }
-
-    public boolean isSolved() {
-        for (byte i = 0; i < 8; i++) {
-            if (this.corners[i][0] !=  i || this.corners[i][1] != 0) {
-                return false;
-                
-            }
-        }
-        for (byte i = 0; i < 12; i++) {
-            if (this.edges[i][0] !=  i || this.edges[i][1] != 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public byte getHeuristic() {
-        return 0;
-    }
-
-    public byte[] getCube() {
-        byte[] cube = new byte[54];
-
-        for (int i = 0; i < 6; i++) {
-            cube[9 * i + 4] =  (byte) i;
-        }
-
-        for (int i = 0; i < 8; i++) {
-
-            byte[] corner = this.corners[i];
-            byte[] index = indexCorners(corner);
-            byte rot = corner[1];
-
-            cube[index[0]] = colorCorners(i, (byte) ((0 + rot) % 3));
-            cube[index[1]] = colorCorners(i, (byte) ((1 + rot) % 3));
-            cube[index[2]] = colorCorners(i, (byte) ((2 + rot) % 3));
-        }
-
-        for (int i = 0; i < 12; i++) {
-
-            byte[] edge = this.edges[i];
-            byte[] index = indexEdges(edge);
-            byte rot = edge[1];
-
-            cube[index[0]] = colorEdges(i, (byte) ((0 + rot) % 2));
-            cube[index[1]] = colorEdges(i, (byte) ((1 + rot) % 2));
-        }
-
-        return cube;
-    }
-
-    private byte colorCorners(int n, byte c) {
-        byte[] tileColors0 = {0, 0, 0, 0, 5, 5, 5, 5};
-        byte[] tileColors1 = {1, 4, 3, 2, 4, 3, 2, 1};
-        byte[] tileColors2 = {4, 3, 2, 1, 1, 4, 3, 2};
-
-        switch (c) {
-            case 0: return tileColors0[n];
-            case 1: return tileColors1[n];
-            case 2: return tileColors2[n];
-            default: return -1;
-        }
-    }
-
-    private byte colorEdges(int n, byte c) {
-        byte[] tileColors0 = {0, 0, 0, 0, 4, 4, 2, 2, 5, 5, 5, 5};
-        byte[] tileColors1 = {4, 3, 2, 1, 1, 3, 3, 1, 4, 3, 2, 1};
-
-        return switch (c) {
-            case 0 -> tileColors0[n];
-            case 1 -> tileColors1[n];
-            default ->  -1;
-        };
-    }
-
-    private byte[] indexCorners(byte[] c) {
-        byte[] index = new byte[3];
-
-        switch (c[0]) {
-            // for top corners of cube
-            case 0: return new byte[] {0, 9, 38};
-            case 1: return new byte[] {2, 36, 29};
-            case 2: return new byte[] {8, 27, 20};
-            case 3: return new byte[] {6, 18, 11};
-            // for bottom corners of cube
-            case 4: return new byte[] {51, 44, 15};
-            case 5: return new byte[] {53, 35, 42};
-            case 6: return new byte[] {47, 26, 33};
-            case 7: return new byte[] {45, 17, 24};
-            default: return index;
-        }
-    }
-
-    private byte[] indexEdges(byte[] e) {
-        byte[] index = new byte[2];
-
-        switch (e[0]) {
-            // top edges
-            case 0: return new byte[] {1, 37};
-            case 1:  return new byte[] {5, 28};
-            case 2:  return new byte[] {7, 19};
-            case 3: return new byte[] {3, 10};
-
-            // middle layer edges
-            case 4: return new byte[] {41, 12};
-            case 5:  return new byte[] {39, 32};
-            case 6:   return new byte[] {23, 30};
-            case 7:  return new byte[] {21, 14};
-
-            // bottom edges
-            case 8: return new byte[] {52, 43};
-            case 9:  return new byte[] {50, 34};
-            case 10:  return new byte[] {46, 25};
-            case 11: return new byte[] {48, 16};
-
-            default: return index;
-        }
-    }
-
-    public void U() {
-        for (byte[] corner : corners) {
-            // if corner is in the top layer
-            if (corner[0] < 4) corner[0] = (byte) ((corner[0] + 1) % 4);
-        }
-        for (byte[] edge : edges) {
-            // if edge is in the top layer
-            if (edge[0] < 4) edge[0] = (byte) ((edge[0] + 1) % 4);
-        }
-    }
-
-    public void Up() {
-        for (byte[] corner : corners) {
-            // if corner is in the top layer
-            if (corner[0] < 4) corner[0] = (byte) ((corner[0] + 3) % 4);
-        }
-        for (byte[] edge : edges) {
-            // if edge is in the top layer
-            if (edge[0] < 4) edge[0] = (byte) ((edge[0] + 3) % 4);
-        }
-    }
-
-    public void U2() {
-        for (byte[] corner : corners) {
-            // if corner is in the top layer
-            if (corner[0] < 4) corner[0] = (byte) ((corner[0] + 2) % 4);
-        }
-        for (byte[] edge : edges) {
-            // if edge is in the top layer
-            if (edge[0] < 4) edge[0] = (byte) ((edge[0] + 2) % 4);
-        }
-    }
-
-    public void D() {
-        for (byte[] corner : corners) {
-            // if corner is in the bottom layer
-            if (corner[0] >= 4) corner[0] = (byte) (((corner[0] + 3) % 4) + 4);
-        }
-        for (byte[] edge : edges) {
-            // if edge is in the bottom layer
-            if (edge[0] >= 8) edge[0] = (byte) (((edge[0] + 3) % 4) + 8);
-        }
-    }
-
-    public void Dp() {
-        for (byte[] corner : corners) {
-            // if corner is in the bottom layer
-            if (corner[0] > 3) corner[0] = (byte) (((corner[0] + 1) % 4) + 4);
-        }
-        for (byte[] edge : edges) {
-            // if edge is in the bottom layer
-            if (edge[0] > 7) edge[0] = (byte) (((edge[0] + 1) % 4) + 8);
-        }
-    }
-
-    public void D2() {
-        for (byte[] corner : corners) {
-            // if corner is in the bottom layer
-            if (corner[0] > 3) corner[0] = (byte) (((corner[0] + 2) % 4) + 4);
-        }
-        for (byte[] edge : edges) {
-            // if edge is in the bottom layer
-            if (edge[0] > 7) edge[0] = (byte) (((edge[0] + 2) % 4) + 8);
-        }
-    }
-
-    public void R() {
-
-        for (byte[] corner : corners) {
-            // if corner is in right layer
-            switch (corner[0]) {
-            case 1 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            case 2 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            case 6 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            case 5 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            default -> { }
-            }
-        }
-
-        for (byte[] edge : edges) {
-            // if edge is in right layer
-            edge[0] = switch (edge[0]) {
-                case 1 -> 5;
-                case 5 -> 9;
-                case 9 -> 6;
-                case 6 -> 1;
-                default -> edge[0];
-            };
-        }
-    }
-
-    public void Rp() {
-        for (byte[] corner : corners) {
-            // if corner is in right layer
-            switch (corner[0]) {
-            case 1 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            case 2 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            case 6 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            case 5 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            default -> { }
-            }
-        }
-
-        for (byte[] edge : edges) {
-            // if edge is in right layer
-            edge[0] = switch (edge[0]) {
-                case 1 -> 6;
-                case 5 -> 1;
-                case 9 -> 5;
-                case 6 -> 9;
-                default -> edge[0];
-            };
-        }
-    }
-
-    public void R2() {
-        for (byte[] corner : corners) {
-            // if corner is in right layer
-            corner[0] = switch (corner[0]) {
-                case 1 -> 6;
-                case 2 -> 5;
-                case 6 -> 1;
-                case 5 -> 2;
-                default -> corner[0];
-            };
-        }
-        for (byte[] edge : edges) {
-            // if edge is in right layer
-            edge[0] = switch (edge[0]) {
-                case 1 -> 9;
-                case 5 -> 6;
-                case 9 -> 1;
-                case 6 -> 5;
-                default -> edge[0];
-            };
-        }
-    }
-
-    public void L() {
-
-        for (byte[] corner : corners) {
-            // if corner is in left layer
-            switch (corner[0]) {
-            case 0 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            case 3 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            case 7 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            case 4 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            default -> { }
-            }
-        }
-
-        for (byte[] edge : edges) {
-            // if edge is in left layer
-            edge[0] = switch (edge[0]) {
-                case 3 -> 7;
-                case 7 -> 11;
-                case 11 -> 4;
-                case 4 -> 3;
-                default -> edge[0];
-            };
-        }
-    }
-
-    public void Lp() {
-
-        for (byte[] corner : corners) {
-            // if corner is in left layer
-            switch (corner[0]) {
-            case 0 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            case 4 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            case 7 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 2) % 3); }
-            case 3 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 1) % 3); }
-            default -> { }
-            }
-        }
-
-        for (byte[] edge : edges) {
-            // if edge is in left layer
-            edge[0] = switch (edge[0]) {
-                case 3 -> 4;
-                case 4 -> 11;
-                case 11 -> 7;
-                case 7 -> 3;
-                default -> edge[0];
-            };
-        }
-    }
-
-    public void L2() {
-        for (byte[] corner : corners) {
-            // if corner is in left layer
-            corner[0] = switch (corner[0]) {
-                case 0 -> 7;
-                case 3 -> 4;
-                case 4 -> 3;
-                case 7 -> 0;
-                default -> corner[0];
-            };
-        }
-
-        for (byte[] edge : edges) {
-            // if edge is in left layer
-            edge[0] = switch (edge[0]) {
-                case 3 -> 11;
-                case 4 -> 7;
-                case 11 -> 3;
-                case 7 -> 4;
-                default -> edge[0];
-            };
         }
     }
 
     public void F() {
-        for (byte[] corner : corners) {
-            // if corner is in front layer
-            switch (corner[0]) {
-                case 2 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                case 3 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                case 6 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                case 7 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                default -> { }
-            }
-        }
+        byte t;
 
-        for (byte[] edge : edges) {
-            // if edge is in front layer
-            switch (edge[0]) {
-            case 2 -> { edge[0] = 6; edge[1] = (byte) (edge[1] ^ 1); }
-            case 6 -> { edge[0] = 10; edge[1] = (byte) (edge[1] ^ 1); }
-            case 10 -> { edge[0] = 7; edge[1] = (byte) (edge[1] ^ 1); }
-            case 7 -> { edge[0] = 2; edge[1] = (byte) (edge[1] ^ 1); }
-            default -> { }
-            }
+        // Rotate front face clockwise (two 4-cycles)
+        t = this.cube[18];
+        this.cube[18] = this.cube[24];
+        this.cube[24] = this.cube[26];
+        this.cube[26] = this.cube[20];
+        this.cube[20] = t;
+
+        t = this.cube[19];
+        this.cube[19] = this.cube[21];
+        this.cube[21] = this.cube[25];
+        this.cube[25] = this.cube[23];
+        this.cube[23] = t;
+
+        // Rotate adjacent edges: U -> R -> D -> L -> U (performed per column)
+        for (int j = 0; j < 3; j++) {
+            int U = 6 + j;         // U bottom row indices 6,7,8
+            int R = 27 + 3 * j;    // R left column indices 27,30,33
+            int D = 47 - j;        // D top row (reversed) indices 47,46,45
+            int L = 17 - 3 * j;    // L right column indices 17,14,11
+
+            t = this.cube[U];
+            this.cube[U] = this.cube[L];
+            this.cube[L] = this.cube[D];
+            this.cube[D] = this.cube[R];
+            this.cube[R] = t;
         }
     }
 
     public void Fp() {
-        for (byte[] corner : corners) {
-            // if corner is in front layer (inverse of F)
-            switch (corner[0]) {
-                case 2 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                case 3 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                case 7 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                case 6 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                default -> { }
-            }
-        }
+        byte t;
 
-        for (byte[] edge : edges) {
-            // if edge is in front layer (inverse of F)
-            switch (edge[0]) {
-                case 2 -> { edge[0] = 7; edge[1] = (byte) (edge[1] ^ 1); }
-                case 6 -> { edge[0] = 2; edge[1] = (byte) (edge[1] ^ 1); }
-                case 10 -> { edge[0] = 6; edge[1] = (byte) (edge[1] ^ 1); }
-                case 7 -> { edge[0] = 10; edge[1] = (byte) (edge[1] ^ 1); }
-                default -> { }
-            }
-        }
-    }
+        // Rotate front face counter-clockwise (two 4-cycles)
+        t = this.cube[18];
+        this.cube[18] = this.cube[20];
+        this.cube[20] = this.cube[26];
+        this.cube[26] = this.cube[24];
+        this.cube[24] = t;
 
-    public void F2() {
-        for (byte[] corner : corners) {
-            // if corner is in front layer
-            corner[0] = switch (corner[0]) {
-                case 2 -> 7;
-                case 3 -> 6;
-                case 6 -> 3;
-                case 7 -> 2;
-                default -> corner[0];
-            };
-        }
+        t = this.cube[19];
+        this.cube[19] = this.cube[23];
+        this.cube[23] = this.cube[25];
+        this.cube[25] = this.cube[21];
+        this.cube[21] = t;
 
-        for (byte[] edge : edges) {
-            // if edge is in front layer
-            edge[0] = switch (edge[0]) {
-                case 2 -> 10;
-                case 6 -> 7;
-                case 10 -> 2;
-                case 7 -> 6;
-                default -> edge[0];
-            };
+        // Rotate adjacent edges (reverse of F)
+        for (int j = 0; j < 3; j++) {
+            int U = 6 + j;         // U bottom row indices 6,7,8
+            int R = 27 + 3 * j;    // R left column indices 27,30,33
+            int D = 47 - j;        // D top row (reversed) indices 47,46,45
+            int L = 17 - 3 * j;    // L right column indices 17,14,11
+
+            t = this.cube[U];
+            this.cube[U] = this.cube[R];
+            this.cube[R] = this.cube[D];
+            this.cube[D] = this.cube[L];
+            this.cube[L] = t;
         }
     }
 
     public void B() {
-        for (byte[] corner : corners) {
-            // if corner is in back layer
-            switch (corner[0]) {
-                case 0 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                case 1 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                case 4 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                case 5 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                default -> { }
-            }
-        }
+        byte t;
 
-        for (byte[] edge : edges) {
-            // if edge is in back layer
-            switch (edge[0]) {
-                case 0 -> { edge[0] = 4; edge[1] = (byte) (edge[1] ^ 1); }
-                case 4 -> { edge[0] = 8; edge[1] = (byte) (edge[1] ^ 1); }
-                case 8 -> { edge[0] = 5; edge[1] = (byte) (edge[1] ^ 1); }
-                case 5 -> { edge[0] = 0; edge[1] = (byte) (edge[1] ^ 1); }
-                default -> { }
-            }
+        // Rotate back face clockwise (two 4-cycles)
+        t = this.cube[36];
+        this.cube[36] = this.cube[42];
+        this.cube[42] = this.cube[44];
+        this.cube[44] = this.cube[38];
+        this.cube[38] = t;
+
+        t = this.cube[37];
+        this.cube[37] = this.cube[39];
+        this.cube[39] = this.cube[43];
+        this.cube[43] = this.cube[41];
+        this.cube[41] = t;
+
+        // Rotate adjacent edges: U <- R <- D <- L <- U (performed per column)
+        for (int j = 0; j < 3; j++) {
+            int U = 2 - j;        // U top row indices 2,1,0 (reversed)
+            int R = 35 - 3 * j;   // R right column indices 35,32,29
+            int D = 51 + j;       // D bottom row indices 51,52,53
+            int L = 9 + 3 * j;    // L left column indices 9,12,15
+
+            t = this.cube[U];
+            this.cube[U] = this.cube[R];
+            this.cube[R] = this.cube[D];
+            this.cube[D] = this.cube[L];
+            this.cube[L] = t;
         }
     }
 
     public void Bp() {
-        for (byte[] corner : corners) {
-            // inverse of B: move corners back and undo orientation
-            switch (corner[0]) {
-                case 0 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                case 1 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                case 4 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 2) % 3); }
-                case 5 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 1) % 3); }
-                default -> { }
-            }
-        }
+        byte t;
 
-        for (byte[] edge : edges) {
-            // inverse of B: move edges back and undo flip (XOR again)
-            switch (edge[0]) {
-                case 0 -> { edge[0] = 5; edge[1] = (byte) (edge[1] ^ 1); }
-                case 4 -> { edge[0] = 0; edge[1] = (byte) (edge[1] ^ 1); }
-                case 8 -> { edge[0] = 4; edge[1] = (byte) (edge[1] ^ 1); }
-                case 5 -> { edge[0] = 8; edge[1] = (byte) (edge[1] ^ 1); }
-                default -> { }
-            }
+        // Rotate back face counter-clockwise (reverse of B)
+        t = this.cube[36];
+        this.cube[36] = this.cube[38];
+        this.cube[38] = this.cube[44];
+        this.cube[44] = this.cube[42];
+        this.cube[42] = t;
+
+        t = this.cube[37];
+        this.cube[37] = this.cube[41];
+        this.cube[41] = this.cube[43];
+        this.cube[43] = this.cube[39];
+        this.cube[39] = t;
+
+        // Rotate adjacent edges (reverse of B's cycle)
+        for (int j = 0; j < 3; j++) {
+            int U = 2 - j;        // U top row indices 2,1,0 (reversed)
+            int R = 35 - 3 * j;   // R right column indices 35,32,29
+            int D = 51 + j;       // D bottom row indices 51,52,53
+            int L = 9 + 3 * j;    // L left column indices 9,12,15
+
+            t = this.cube[U];
+            this.cube[U] = this.cube[L];
+            this.cube[L] = this.cube[D];
+            this.cube[D] = this.cube[R];
+            this.cube[R] = t;
         }
     }
 
-    public void B2() {
-        for (byte[] corner : corners) {
-            corner[0] = switch (corner[0]) {
-                case 0 -> 5;
-                case 1 -> 4;
-                case 4 -> 1;
-                case 5 -> 0;
-                default -> corner[0];
-            };
-        }
+    public void R() {
+        byte t;
 
-        for (byte[] edge : edges) {
-            edge[0] = switch (edge[0]) {
-                case 0 -> 8;
-                case 4 -> 5;
-                case 8 -> 0;
-                case 5 -> 4;
-                default -> edge[0];
-            };
+        // Rotate right face clockwise (two 4-cycles)
+        t = this.cube[27];
+        this.cube[27] = this.cube[33];
+        this.cube[33] = this.cube[35];
+        this.cube[35] = this.cube[29];
+        this.cube[29] = t;
+
+        t = this.cube[28];
+        this.cube[28] = this.cube[30];
+        this.cube[30] = this.cube[34];
+        this.cube[34] = this.cube[32];
+        this.cube[32] = t;
+
+        // Rotate adjacent edges (4-cycles)
+        t = this.cube[8];
+        this.cube[8] = this.cube[26];
+        this.cube[26] = this.cube[53];
+        this.cube[53] = this.cube[36];
+        this.cube[36] = t;
+
+        t = this.cube[5];
+        this.cube[5] = this.cube[23];
+        this.cube[23] = this.cube[50];
+        this.cube[50] = this.cube[39];
+        this.cube[39] = t;
+
+        t = this.cube[2];
+        this.cube[2] = this.cube[20];
+        this.cube[20] = this.cube[47];
+        this.cube[47] = this.cube[42];
+        this.cube[42] = t;
+    }
+
+    public void Rp() {
+        byte t;
+
+        // Rotate right face counter-clockwise (two 4-cycles)
+        t = this.cube[27];
+        this.cube[27] = this.cube[29];
+        this.cube[29] = this.cube[35];
+        this.cube[35] = this.cube[33];
+        this.cube[33] = t;
+
+        t = this.cube[28];
+        this.cube[28] = this.cube[32];
+        this.cube[32] = this.cube[34];
+        this.cube[34] = this.cube[30];
+        this.cube[30] = t;
+
+        // Rotate adjacent edges (reverse 4-cycles)
+        t = this.cube[8];
+        this.cube[8] = this.cube[36];
+        this.cube[36] = this.cube[53];
+        this.cube[53] = this.cube[26];
+        this.cube[26] = t;
+
+        t = this.cube[5];
+        this.cube[5] = this.cube[39];
+        this.cube[39] = this.cube[50];
+        this.cube[50] = this.cube[23];
+        this.cube[23] = t;
+
+        t = this.cube[2];
+        this.cube[2] = this.cube[42];
+        this.cube[42] = this.cube[47];
+        this.cube[47] = this.cube[20];
+        this.cube[20] = t;
+    }
+
+    public void L() {
+        byte t;
+
+        // Rotate left face counter-clockwise (two 4-cycles)
+        t = this.cube[9];
+        this.cube[9] = this.cube[15];
+        this.cube[15] = this.cube[17];
+        this.cube[17] = this.cube[11];
+        this.cube[11] = t;
+
+        t = this.cube[10];
+        this.cube[10] = this.cube[12];
+        this.cube[12] = this.cube[16];
+        this.cube[16] = this.cube[14];
+        this.cube[14] = t;
+
+        // Rotate adjacent edges (U <- B <- D <- F <- U) per column
+        t = this.cube[0];
+        this.cube[0] = this.cube[44];
+        this.cube[44] = this.cube[45];
+        this.cube[45] = this.cube[18];
+        this.cube[18] = t;
+
+        t = this.cube[3];
+        this.cube[3] = this.cube[41];
+        this.cube[41] = this.cube[48];
+        this.cube[48] = this.cube[21];
+        this.cube[21] = t;
+
+        t = this.cube[6];
+        this.cube[6] = this.cube[38];
+        this.cube[38] = this.cube[51];
+        this.cube[51] = this.cube[24];
+        this.cube[24] = t;
+    }
+
+    public void Lp() {
+        byte t;
+
+        // Rotate left face clockwise (two 4-cycles)
+        t = this.cube[9];
+        this.cube[9] = this.cube[11];
+        this.cube[11] = this.cube[17];
+        this.cube[17] = this.cube[15];
+        this.cube[15] = t;
+
+        t = this.cube[10];
+        this.cube[10] = this.cube[14];
+        this.cube[14] = this.cube[16];
+        this.cube[16] = this.cube[12];
+        this.cube[12] = t;
+
+        // Rotate adjacent edges (U -> F -> D -> B -> U) per column
+        t = this.cube[0];
+        this.cube[0] = this.cube[18];
+        this.cube[18] = this.cube[45];
+        this.cube[45] = this.cube[44];
+        this.cube[44] = t;
+
+        t = this.cube[3];
+        this.cube[3] = this.cube[21];
+        this.cube[21] = this.cube[48];
+        this.cube[48] = this.cube[41];
+        this.cube[41] = t;
+
+        t = this.cube[6];
+        this.cube[6] = this.cube[24];
+        this.cube[24] = this.cube[51];
+        this.cube[51] = this.cube[38];
+        this.cube[38] = t;
+    }
+
+    public void U() {
+        byte t;
+
+        // Rotate upper face clockwise (two 4-cycles)
+        t = this.cube[0];
+        this.cube[0] = this.cube[6];
+        this.cube[6] = this.cube[8];
+        this.cube[8] = this.cube[2];
+        this.cube[2] = t;
+
+        t = this.cube[1];
+        this.cube[1] = this.cube[3];
+        this.cube[3] = this.cube[7];
+        this.cube[7] = this.cube[5];
+        this.cube[5] = t;
+
+        // center (4) remains the same
+
+        // Rotate adjacent edges: cycle (27->18->9->36->27) for each of the three columns
+        for (int j = 0; j < 3; j++) {
+            int A = 27 + j;
+            int B = 18 + j;
+            int C = 9 + j;
+            int D = 36 + j;
+
+            t = this.cube[A];
+            this.cube[A] = this.cube[D];
+            this.cube[D] = this.cube[C];
+            this.cube[C] = this.cube[B];
+            this.cube[B] = t;
         }
+    }
+
+    public void Up() {
+        byte t;
+
+        // Rotate upper face counter-clockwise (reverse of U)
+        t = this.cube[0];
+        this.cube[0] = this.cube[2];
+        this.cube[2] = this.cube[8];
+        this.cube[8] = this.cube[6];
+        this.cube[6] = t;
+
+        t = this.cube[1];
+        this.cube[1] = this.cube[5];
+        this.cube[5] = this.cube[7];
+        this.cube[7] = this.cube[3];
+        this.cube[3] = t;
+
+        // Rotate adjacent edges (reverse of U's cycle)
+        for (int j = 0; j < 3; j++) {
+            int A = 27 + j;
+            int B = 18 + j;
+            int C = 9 + j;
+            int D = 36 + j;
+
+            t = this.cube[A];
+            this.cube[A] = this.cube[B];
+            this.cube[B] = this.cube[C];
+            this.cube[C] = this.cube[D];
+            this.cube[D] = t;
+        }
+    }
+
+    public void D() {
+        byte t;
+
+        // Rotate down face clockwise (two 4-cycles)
+        t = this.cube[45];
+        this.cube[45] = this.cube[51];
+        this.cube[51] = this.cube[53];
+        this.cube[53] = this.cube[47];
+        this.cube[47] = t;
+
+        t = this.cube[46];
+        this.cube[46] = this.cube[48];
+        this.cube[48] = this.cube[52];
+        this.cube[52] = this.cube[50];
+        this.cube[50] = t;
+
+        // Rotate adjacent edges (F -> R -> B -> L -> F)
+        for (int j = 0; j < 3; j++) {
+            int A = 24 + j;
+            int B = 33 + j;
+            int C = 42 + j;
+            int D = 15 + j;
+
+            t = this.cube[A];
+            this.cube[A] = this.cube[D];
+            this.cube[D] = this.cube[C];
+            this.cube[C] = this.cube[B];
+            this.cube[B] = t;
+        }
+    }
+
+    public void Dp() {
+        byte t;
+
+        // Rotate down face counter-clockwise (reverse of D)
+        t = this.cube[45];
+        this.cube[45] = this.cube[47];
+        this.cube[47] = this.cube[53];
+        this.cube[53] = this.cube[51];
+        this.cube[51] = t;
+
+        t = this.cube[46];
+        this.cube[46] = this.cube[50];
+        this.cube[50] = this.cube[52];
+        this.cube[52] = this.cube[48];
+        this.cube[48] = t;
+
+        // Rotate adjacent edges (reverse of D's cycle)
+        for (int j = 0; j < 3; j++) {
+            int A = 33 + j;
+            int B = 42 + j;
+            int C = 15 + j;
+            int D = 24 + j;
+
+            t = this.cube[A];
+            this.cube[A] = this.cube[B];
+            this.cube[B] = this.cube[C];
+            this.cube[C] = this.cube[D];
+            this.cube[D] = t;
+        }
+    }
+
+    public Cube copy() {
+        Cube newCube = new Cube();
+        newCube.setCube(this.cube.clone());
+        return newCube;
     }
 }

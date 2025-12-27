@@ -9,22 +9,9 @@ public class Main {
     public static void main(String[] args) {
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves("R"); // example scramble
+        cube.performMoves("L F' L' U' L U F U' L'"); // example scramble
     }
-
-    public static void testCubeSpeed() {
-        Cube testCube = new Cube();
-        long numberOfStates = (long) Math.pow(10, 2); // approximately 4.85 million
-
-        long startTime = System.currentTimeMillis();
-        for (int i = 0; i < numberOfStates; i++) {
-            testCube.applyMove(i % 12);
-        }
-        long endTime = System.currentTimeMillis();
-
-        System.out.println("Applied " + numberOfStates + " moves in " + (endTime - startTime)/1000.0 + " s");
-    }
-
+    
     public static void solve() {
         solver = new CubeSolver();
         System.out.println("Starting to solve the cube...");
