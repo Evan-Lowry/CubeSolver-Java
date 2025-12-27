@@ -7,10 +7,6 @@ public class Corner extends Cubit {
         this.rot = rot;
     }
 
-    public boolean isSolved() {
-        return rot == 0 && this.isInCorrectPlace();
-    }
-
     public int getRot() {
         return rot;
     }

@@ -2,39 +2,44 @@ import java.util.Arrays;
 
 public class CubeMatrix {
 
+    private final Corner[] goalCorners = new Corner[8];
+    private final Edge[] goalEdges = new Edge[12];
     private Corner[] corners = new Corner[8];
     private Edge[] edges = new Edge[12];
 
     public CubeMatrix() {
         // creates top face
-        this.corners[0] = new Corner(-1, 1, -1, 0);
-        this.corners[1] = new Corner(1, 1, -1, 0);
-        this.corners[2] = new Corner(1, 1, 1, 0);
-        this.corners[3] = new Corner(-1, 1, 1, 0);
+        this.goalCorners[0] = new Corner(-1, 1, -1, 0);
+        this.goalCorners[1] = new Corner(1, 1, -1, 0);
+        this.goalCorners[2] = new Corner(1, 1, 1, 0);
+        this.goalCorners[3] = new Corner(-1, 1, 1, 0);
 
         // creates bottom face
-        this.corners[4] = new Corner(-1, -1, -1, 0);
-        this.corners[5] = new Corner(1, -1, -1, 0);
-        this.corners[6] = new Corner(1, -1, 1, 0);
-        this.corners[7] = new Corner(-1, -1, 1, 0);
+        this.goalCorners[4] = new Corner(-1, -1, -1, 0);
+        this.goalCorners[5] = new Corner(1, -1, -1, 0);
+        this.goalCorners[6] = new Corner(1, -1, 1, 0);
+        this.goalCorners[7] = new Corner(-1, -1, 1, 0);
 
         //creates top face
-        this.edges[0] = new Edge(0, 1, -1, 0);
-        this.edges[1] = new Edge(1, 1, 0, 0);
-        this.edges[2] = new Edge(0, 1, 1, 0);
-        this.edges[3] = new Edge(-1, 1, 0, 0);
+        this.goalEdges[0] = new Edge(0, 1, -1, 0);
+        this.goalEdges[1] = new Edge(1, 1, 0, 0);
+        this.goalEdges[2] = new Edge(0, 1, 1, 0);
+        this.goalEdges[3] = new Edge(-1, 1, 0, 0);
 
         //creates middle layer
-        this.edges[4] = new Edge(-1, 0, -1, 0);
-        this.edges[5] = new Edge(1, 0, -1, 0);
-        this.edges[6] = new Edge(1, 0, 1, 0);
-        this.edges[7] = new Edge(-1, 0, 1, 0);
+        this.goalEdges[4] = new Edge(-1, 0, -1, 0);
+        this.goalEdges[5] = new Edge(1, 0, -1, 0);
+        this.goalEdges[6] = new Edge(1, 0, 1, 0);
+        this.goalEdges[7] = new Edge(-1, 0, 1, 0);
 
         //creates bottom face
-        this.edges[8] = new Edge(0, -1, -1, 0);
-        this.edges[9] = new Edge(1, -1, 0, 0);
-        this.edges[10] = new Edge(0, -1, 1, 0);
-        this.edges[11] = new Edge(-1, -1, 0, 0);
+        this.goalEdges[8] = new Edge(0, -1, -1, 0);
+        this.goalEdges[9] = new Edge(1, -1, 0, 0);
+        this.goalEdges[10] = new Edge(0, -1, 1, 0);
+        this.goalEdges[11] = new Edge(-1, -1, 0, 0);
+
+        this.corners = this.goalCorners.clone();
+        this.edges = this.goalEdges.clone();
     }
 
     public Corner[] getCorners() {
@@ -43,18 +48,6 @@ public class CubeMatrix {
 
     public Edge[] getEdges() {
         return this.edges;
-    }
-
-    public byte[] getCube() {
-        byte[] cubeState = new byte[54];
-
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 9; j++) {
-                cubeState[9*i+j] = (byte) i;
-            }
-        }
-
-        return cubeState;
     }
 
     public void performMoves(String moves) {
@@ -127,26 +120,14 @@ public class CubeMatrix {
     }
 
     public boolean isSolved() {
-        for (Corner corner : corners) {
-            if (!corner.isSolved()) {
-                return false;
-            }
-        }
-
-        for (Edge edge : edges) {
-            if (!edge.isSolved()) {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.equals(this.corners, this.goalCorners) && Arrays.equals(this.edges, this.goalEdges);
     }
 
     public int getHeuristic() {
         return 0;
     }
 
-    public byte[] toByteArray() {
+    public byte[] getCube() {
         byte[] cube = new byte[54];
 
         for (int i = 0; i < 6; i++) {

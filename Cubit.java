@@ -5,22 +5,10 @@ public class Cubit {
     private int y;
     private int z;
 
-    private int SolvedX;
-    private int SolvedY;
-    private int SolvedZ;
-
     public Cubit(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
-
-        this.SolvedX = x;
-        this.SolvedY = y;
-        this.SolvedZ = z;
-    }
-
-    public boolean isInCorrectPlace() {
-        return this.x == this.SolvedX && this.y == this.SolvedY && this.z == this.SolvedZ;
     }
 
     public int getX() {
