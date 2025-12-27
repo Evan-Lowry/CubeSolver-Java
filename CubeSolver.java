@@ -91,21 +91,15 @@ public class CubeSolver {
                 }
             }
 
-            int heuristic = state.getHeuristic();
-
             // Apply the choice
             state.applyMove(i);
             moves.push(i);
             stateCounter++;
 
-            int newHeuristic = state.getHeuristic();
-
-            if (true) {
-                // Continue exploring this path
-                // Recurse: Move to the next level
-                if (solveCube(state, depth - 1)) {
-                    return true;
-                }
+            // Continue exploring this path
+            // Recurse: Move to the next level
+            if (solveCube(state, depth - 1)) {
+                return true;
             }
 
             // 4. BACKTRACK: Undo the choice to return to the previous state

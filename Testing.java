@@ -1,16 +1,25 @@
 public class Testing {
     public static void main(String[] args) {
-        byte[] cubeState = new byte[54];
+        for (int n = 5; n <= 9; n++) {
+            testCubeSpeed(n);
+        }
 
-        System.out.println(cubeState.length);
+    }
+    public static void testCubeSpeed(int n) {
+        Cube testCube = new Cube();
+        long numberOfStates = (long) Math.pow(10, n);
+        int j = 0;
 
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 9; j++) {
-                cubeState[9*i+j] = (byte) i;
+        long startTime = System.currentTimeMillis();
+        for (long i = 0; i < numberOfStates; i++) {
+            testCube.applyMove(j);
+            j++;
+            if (j == 12) {
+                j = 0;
             }
         }
-        for (byte b : cubeState) {
-            System.out.print(b + " ");
-        }
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("Applied 10^" + n + " moves in " + (endTime - startTime)/1000.0 + " s");
     }
 }

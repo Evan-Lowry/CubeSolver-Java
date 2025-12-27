@@ -1,10 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.util.Arrays;
-
-import org.w3c.dom.css.Rect;
 
 public class Drawing {
 
@@ -43,7 +39,6 @@ public class Drawing {
                     Rectangle facelet = new Rectangle(CubeUI.WINDOW_WIDTH/2 + CUBE_SIZE * (3*k + i - 6), CubeUI.WINDOW_HEIGHT/2 + CUBE_SIZE * j - CUBE_SIZE * 9/2, FACELET_SIZE, FACELET_SIZE);
 
                     g2.setColor(getColor(CubeUI.getCube()[k * 9 + i + j * 3]));
-
                     g2.fill(facelet);
                     g2.setColor(Color.BLACK);
                     g2.draw(facelet);
