@@ -1,18 +1,16 @@
-import java.util.Arrays;
-
-public class Cube3D {
+public class Cube {
 
     private byte[][] corners = new byte[8][2];
     private byte[][] edges = new byte[12][2];
 
-    public Cube3D() {
+    public Cube() {
 
-        for (int i = 0; i < 8; i++) {
-            this.corners[i] = new byte[] {(byte) i, 0};
+        for (byte i = 0; i < 8; i++) {
+            this.corners[i] = new byte[] {i, 0};
         }
 
-        for (int i = 0; i < 12; i++) {
-            this.edges[i] = new byte[] {(byte) i, 0};
+        for (byte i = 0; i < 12; i++) {
+            this.edges[i] = new byte[] {i, 0};
         }
     }
 
@@ -94,21 +92,21 @@ public class Cube3D {
     }
 
     public boolean isSolved() {
-        for (int i = 0; i < 8; i++) {
-            if (this.corners[i][0] != (byte) i || this.corners[i][1] != 0) {
+        for (byte i = 0; i < 8; i++) {
+            if (this.corners[i][0] !=  i || this.corners[i][1] != 0) {
                 return false;
                 
             }
         }
-        for (int i = 0; i < 12; i++) {
-            if (this.edges[i][0] != (byte) i || this.edges[i][1] != 0) {
+        for (byte i = 0; i < 12; i++) {
+            if (this.edges[i][0] !=  i || this.edges[i][1] != 0) {
                 return false;
             }
         }
         return true;
     }
 
-    public int getHeuristic() {
+    public byte getHeuristic() {
         return 0;
     }
 
@@ -116,34 +114,34 @@ public class Cube3D {
         byte[] cube = new byte[54];
 
         for (int i = 0; i < 6; i++) {
-            cube[9 * i + 4] = (byte) i;
+            cube[9 * i + 4] =  (byte) i;
         }
 
         for (int i = 0; i < 8; i++) {
 
             byte[] corner = this.corners[i];
-            int[] index = indexCorners(corner);
-            int rot = corner[1];
+            byte[] index = indexCorners(corner);
+            byte rot = corner[1];
 
-            cube[index[0]] = colorCorners(i, (0 + rot) % 3);
-            cube[index[1]] = colorCorners(i, (1 + rot) % 3);
-            cube[index[2]] = colorCorners(i, (2 + rot) % 3);
+            cube[index[0]] = colorCorners(i, (byte) ((0 + rot) % 3));
+            cube[index[1]] = colorCorners(i, (byte) ((1 + rot) % 3));
+            cube[index[2]] = colorCorners(i, (byte) ((2 + rot) % 3));
         }
 
         for (int i = 0; i < 12; i++) {
 
             byte[] edge = this.edges[i];
-            int[] index = indexEdges(edge);
-            int rot = edge[1];
+            byte[] index = indexEdges(edge);
+            byte rot = edge[1];
 
-            cube[index[0]] = colorEdges(i, (0 + rot) % 2);
-            cube[index[1]] = colorEdges(i, (1 + rot) % 2);
+            cube[index[0]] = colorEdges(i, (byte) ((0 + rot) % 2));
+            cube[index[1]] = colorEdges(i, (byte) ((1 + rot) % 2));
         }
 
         return cube;
     }
 
-    private byte colorCorners(int n, int c) {
+    private byte colorCorners(int n, byte c) {
         byte[] tileColors0 = {0, 0, 0, 0, 5, 5, 5, 5};
         byte[] tileColors1 = {1, 4, 3, 2, 4, 3, 2, 1};
         byte[] tileColors2 = {4, 3, 2, 1, 1, 4, 3, 2};
@@ -152,60 +150,60 @@ public class Cube3D {
             case 0: return tileColors0[n];
             case 1: return tileColors1[n];
             case 2: return tileColors2[n];
-            default: return (byte) -1;
+            default: return -1;
         }
     }
 
-    private byte colorEdges(int n, int c) {
+    private byte colorEdges(int n, byte c) {
         byte[] tileColors0 = {0, 0, 0, 0, 4, 4, 2, 2, 5, 5, 5, 5};
         byte[] tileColors1 = {4, 3, 2, 1, 1, 3, 3, 1, 4, 3, 2, 1};
 
         return switch (c) {
             case 0 -> tileColors0[n];
             case 1 -> tileColors1[n];
-            default -> (byte) -1;
+            default ->  -1;
         };
     }
 
-    private int[] indexCorners(byte[] c) {
-        int[] index = new int[3];
+    private byte[] indexCorners(byte[] c) {
+        byte[] index = new byte[3];
 
         switch (c[0]) {
             // for top corners of cube
-            case 0: return new int[] {0, 9, 38};
-            case 1: return new int[] {2, 36, 29};
-            case 2: return new int[] {8, 27, 20};
-            case 3: return new int[] {6, 18, 11};
+            case 0: return new byte[] {0, 9, 38};
+            case 1: return new byte[] {2, 36, 29};
+            case 2: return new byte[] {8, 27, 20};
+            case 3: return new byte[] {6, 18, 11};
             // for bottom corners of cube
-            case 4: return new int[] {51, 44, 15};
-            case 5: return new int[] {53, 35, 42};
-            case 6: return new int[] {47, 26, 33};
-            case 7: return new int[] {45, 17, 24};
+            case 4: return new byte[] {51, 44, 15};
+            case 5: return new byte[] {53, 35, 42};
+            case 6: return new byte[] {47, 26, 33};
+            case 7: return new byte[] {45, 17, 24};
             default: return index;
         }
     }
 
-    private int[] indexEdges(byte[] e) {
-        int[] index = new int[2];
+    private byte[] indexEdges(byte[] e) {
+        byte[] index = new byte[2];
 
         switch (e[0]) {
             // top edges
-            case 0: return new int[] {1, 37};
-            case 1:  return new int[] {5, 28};
-            case 2:  return new int[] {7, 19};
-            case 3: return new int[] {3, 10};
+            case 0: return new byte[] {1, 37};
+            case 1:  return new byte[] {5, 28};
+            case 2:  return new byte[] {7, 19};
+            case 3: return new byte[] {3, 10};
 
             // middle layer edges
-            case 4: return new int[] {41, 12};
-            case 5:  return new int[] {39, 32};
-            case 6:   return new int[] {23, 30};
-            case 7:  return new int[] {21, 14};
+            case 4: return new byte[] {41, 12};
+            case 5:  return new byte[] {39, 32};
+            case 6:   return new byte[] {23, 30};
+            case 7:  return new byte[] {21, 14};
 
             // bottom edges
-            case 8: return new int[] {52, 43};
-            case 9:  return new int[] {50, 34};
-            case 10:  return new int[] {46, 25};
-            case 11: return new int[] {48, 16};
+            case 8: return new byte[] {52, 43};
+            case 9:  return new byte[] {50, 34};
+            case 10:  return new byte[] {46, 25};
+            case 11: return new byte[] {48, 16};
 
             default: return index;
         }
@@ -225,11 +223,11 @@ public class Cube3D {
     public void Up() {
         for (byte[] corner : corners) {
             // if corner is in the top layer
-            if (corner[0] < 4) corner[0] = (byte) ((corner[0] - 1) % 4);
+            if (corner[0] < 4) corner[0] = (byte) ((corner[0] + 3) % 4);
         }
         for (byte[] edge : edges) {
             // if edge is in the top layer
-            if (edge[0] < 4) edge[0] = (byte) ((edge[0] - 1) % 4);
+            if (edge[0] < 4) edge[0] = (byte) ((edge[0] + 3) % 4);
         }
     }
 
@@ -247,46 +245,47 @@ public class Cube3D {
     public void D() {
         for (byte[] corner : corners) {
             // if corner is in the bottom layer
-            if (corner[0] > 3) corner[0] = (byte) ((corner[0] - 1) % 4);
+            if (corner[0] >= 4) corner[0] = (byte) (((corner[0] + 3) % 4) + 4);
         }
         for (byte[] edge : edges) {
             // if edge is in the bottom layer
-            if (edge[0] > 7) edge[0] = (byte) ((edge[0] - 1) % 4);
+            if (edge[0] >= 8) edge[0] = (byte) (((edge[0] + 3) % 4) + 8);
         }
     }
 
     public void Dp() {
         for (byte[] corner : corners) {
             // if corner is in the bottom layer
-            if (corner[0] > 3) corner[0] = (byte) ((corner[0] + 1) % 4);
+            if (corner[0] > 3) corner[0] = (byte) (((corner[0] + 1) % 4) + 4);
         }
         for (byte[] edge : edges) {
             // if edge is in the bottom layer
-            if (edge[0] > 7) edge[0] = (byte) ((edge[0] + 1) % 4);
+            if (edge[0] > 7) edge[0] = (byte) (((edge[0] + 1) % 4) + 8);
         }
     }
 
     public void D2() {
         for (byte[] corner : corners) {
             // if corner is in the bottom layer
-            if (corner[0] > 3) corner[0] = (byte) ((corner[0] + 2) % 4);
+            if (corner[0] > 3) corner[0] = (byte) (((corner[0] + 2) % 4) + 4);
         }
         for (byte[] edge : edges) {
             // if edge is in the bottom layer
-            if (edge[0] > 7) edge[0] = (byte) ((edge[0] + 2) % 4);
+            if (edge[0] > 7) edge[0] = (byte) (((edge[0] + 2) % 4) + 8);
         }
     }
 
     public void R() {
+
         for (byte[] corner : corners) {
             // if corner is in right layer
-            corner[0] = switch (corner[0]) {
-                case 1 -> 2;
-                case 2 -> 6;
-                case 6 -> 5;
-                case 5 -> 1;
-                default -> corner[0];
-            };
+            switch (corner[0]) {
+            case 1 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            case 2 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            case 6 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            case 5 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
@@ -295,7 +294,7 @@ public class Cube3D {
                 case 1 -> 5;
                 case 5 -> 9;
                 case 9 -> 6;
-                case 6 -> 2;
+                case 6 -> 1;
                 default -> edge[0];
             };
         }
@@ -304,22 +303,22 @@ public class Cube3D {
     public void Rp() {
         for (byte[] corner : corners) {
             // if corner is in right layer
-            corner[0] = switch (corner[0]) {
-                case 1 -> 2;
-                case 2 -> 6;
-                case 6 -> 5;
-                case 5 -> 1;
-                default -> corner[0];
-            };
+            switch (corner[0]) {
+            case 1 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            case 2 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            case 6 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            case 5 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
             // if edge is in right layer
             edge[0] = switch (edge[0]) {
-                case 1 -> 5;
-                case 5 -> 9;
-                case 9 -> 6;
-                case 6 -> 2;
+                case 1 -> 6;
+                case 5 -> 1;
+                case 9 -> 5;
+                case 6 -> 9;
                 default -> edge[0];
             };
         }
@@ -349,15 +348,16 @@ public class Cube3D {
     }
 
     public void L() {
+
         for (byte[] corner : corners) {
             // if corner is in left layer
-            corner[0] = switch (corner[0]) {
-                case 0 -> 3;
-                case 3 -> 7;
-                case 7 -> 4;
-                case 4 -> 0;
-                default -> corner[0];
-            };
+            switch (corner[0]) {
+            case 0 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            case 3 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            case 7 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            case 4 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
@@ -373,15 +373,16 @@ public class Cube3D {
     }
 
     public void Lp() {
+
         for (byte[] corner : corners) {
             // if corner is in left layer
-            corner[0] = switch (corner[0]) {
-                case 0 -> 4;
-                case 4 -> 7;
-                case 7 -> 3;
-                case 3 -> 0;
-                default -> corner[0];
-            };
+            switch (corner[0]) {
+            case 0 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            case 4 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            case 7 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 2) % 3); }
+            case 3 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 1) % 3); }
+            default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
@@ -423,48 +424,48 @@ public class Cube3D {
     public void F() {
         for (byte[] corner : corners) {
             // if corner is in front layer
-            corner[0] = switch (corner[0]) {
-                case 2 -> 6;
-                case 3 -> 2;
-                case 6 -> 7;
-                case 7 -> 2;
-                default -> corner[0];
-            };
+            switch (corner[0]) {
+                case 2 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                case 3 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                case 6 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                case 7 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
             // if edge is in front layer
-            edge[0] = switch (edge[0]) {
-                case 2 -> 6;
-                case 6 -> 10;
-                case 10 -> 7;
-                case 7 -> 6;
-                default -> edge[0];
-            };
+            switch (edge[0]) {
+            case 2 -> { edge[0] = 6; edge[1] = (byte) (edge[1] ^ 1); }
+            case 6 -> { edge[0] = 10; edge[1] = (byte) (edge[1] ^ 1); }
+            case 10 -> { edge[0] = 7; edge[1] = (byte) (edge[1] ^ 1); }
+            case 7 -> { edge[0] = 2; edge[1] = (byte) (edge[1] ^ 1); }
+            default -> { }
+            }
         }
     }
 
     public void Fp() {
         for (byte[] corner : corners) {
-            // if corner is in front layer
-            corner[0] = switch (corner[0]) {
-                case 2 -> 3;
-                case 3 -> 7;
-                case 7 -> 6;
-                case 6 -> 2;
-                default -> corner[0];
-            };
+            // if corner is in front layer (inverse of F)
+            switch (corner[0]) {
+                case 2 -> { corner[0] = 3; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                case 3 -> { corner[0] = 7; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                case 7 -> { corner[0] = 6; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                case 6 -> { corner[0] = 2; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
-            // if edge is in front layer
-            edge[0] = switch (edge[0]) {
-                case 2 -> 7;
-                case 6 -> 2;
-                case 10 -> 6;
-                case 7 -> 10;
-                default -> edge[0];
-            };
+            // if edge is in front layer (inverse of F)
+            switch (edge[0]) {
+                case 2 -> { edge[0] = 7; edge[1] = (byte) (edge[1] ^ 1); }
+                case 6 -> { edge[0] = 2; edge[1] = (byte) (edge[1] ^ 1); }
+                case 10 -> { edge[0] = 6; edge[1] = (byte) (edge[1] ^ 1); }
+                case 7 -> { edge[0] = 10; edge[1] = (byte) (edge[1] ^ 1); }
+                default -> { }
+            }
         }
     }
 
@@ -494,45 +495,49 @@ public class Cube3D {
 
     public void B() {
         for (byte[] corner : corners) {
-            corner[0] = switch (corner[0]) {
-                case 0 -> 4;
-                case 1 -> 0;
-                case 4 -> 5;
-                case 5 -> 1;
-                default -> corner[0];
-            };
+            // if corner is in back layer
+            switch (corner[0]) {
+                case 0 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                case 1 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                case 4 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                case 5 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
-            edge[0] = switch (edge[0]) {
-                case 0 -> 4;
-                case 4 -> 8;
-                case 8 -> 5;
-                case 5 -> 0;
-                default -> edge[0];
-            };
+            // if edge is in back layer
+            switch (edge[0]) {
+                case 0 -> { edge[0] = 4; edge[1] = (byte) (edge[1] ^ 1); }
+                case 4 -> { edge[0] = 8; edge[1] = (byte) (edge[1] ^ 1); }
+                case 8 -> { edge[0] = 5; edge[1] = (byte) (edge[1] ^ 1); }
+                case 5 -> { edge[0] = 0; edge[1] = (byte) (edge[1] ^ 1); }
+                default -> { }
+            }
         }
     }
 
     public void Bp() {
         for (byte[] corner : corners) {
-            corner[0] = switch (corner[0]) {
-                case 0 -> 1;
-                case 1 -> 5;
-                case 4 -> 0;
-                case 5 -> 4;
-                default -> corner[0];
-            };
+            // inverse of B: move corners back and undo orientation
+            switch (corner[0]) {
+                case 0 -> { corner[0] = 1; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                case 1 -> { corner[0] = 5; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                case 4 -> { corner[0] = 0; corner[1] = (byte) ((corner[1] + 2) % 3); }
+                case 5 -> { corner[0] = 4; corner[1] = (byte) ((corner[1] + 1) % 3); }
+                default -> { }
+            }
         }
 
         for (byte[] edge : edges) {
-            edge[0] = switch (edge[0]) {
-                case 0 -> 5;
-                case 4 -> 0;
-                case 8 -> 4;
-                case 5 -> 8;
-                default -> edge[0];
-            };
+            // inverse of B: move edges back and undo flip (XOR again)
+            switch (edge[0]) {
+                case 0 -> { edge[0] = 5; edge[1] = (byte) (edge[1] ^ 1); }
+                case 4 -> { edge[0] = 0; edge[1] = (byte) (edge[1] ^ 1); }
+                case 8 -> { edge[0] = 4; edge[1] = (byte) (edge[1] ^ 1); }
+                case 5 -> { edge[0] = 8; edge[1] = (byte) (edge[1] ^ 1); }
+                default -> { }
+            }
         }
     }
 

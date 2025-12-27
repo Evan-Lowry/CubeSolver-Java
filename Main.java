@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves(" "); // example scramble
+        cube.performMoves("R"); // example scramble
     }
 
     public static void testCubeSpeed() {

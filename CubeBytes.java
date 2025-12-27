@@ -1,10 +1,10 @@
 import java.util.ArrayList;
 
-public class Cube {
+public class CubeBytes {
 
     private byte[] cube = new byte[54];
 
-    public Cube() {
+    public CubeBytes() {
 
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 9; j++) {
@@ -45,8 +45,12 @@ public class Cube {
         return output;
     }
 
-    public byte[] getCube() {
-        return this.cube;
+    public int[] getCube() {
+        int[] intCube = new int[54];
+        for (int i = 0; i < 54; i++) {
+            intCube[i] = this.cube[i];
+        }
+        return intCube;
     }
 
     public void setCube(byte[] newCube) {
@@ -547,8 +551,8 @@ public class Cube {
         this.cube = newCube;
     }
 
-    public Cube copy() {
-        Cube newCube = new Cube();
+    public CubeBytes copy() {
+        CubeBytes newCube = new CubeBytes();
         newCube.setCube(this.cube.clone());
         return newCube;
     }
