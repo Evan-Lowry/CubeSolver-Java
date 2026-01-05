@@ -22,6 +22,13 @@ final class IntStack {
         }
         return copy;
     }
+    public void insert(int index, int value) {
+        if (index < 0 || index > size) throw new IndexOutOfBoundsException();
+        if (size == data.length) data = Arrays.copyOf(data, data.length * 2);
+        System.arraycopy(data, index, data, index + 1, size - index);
+        data[index] = value;
+        size++;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();

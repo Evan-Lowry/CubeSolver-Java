@@ -18,6 +18,55 @@ public class Drawing {
         drawCube(g2);
     }
 
+    public void drawCorners(Graphics2D g2) {
+        // set the color to white
+        g2.setColor(Color.white);
+        // draw the cube
+        drawCubeCorners(g2);
+    }
+
+    private void drawCubeCorners(Graphics2D g2) {
+        // draw top face
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                Rectangle facelet = new Rectangle(CubeCornersUI.WINDOW_WIDTH/2 + CUBE_SIZE * (i - 2), CubeCornersUI.WINDOW_HEIGHT/2 + CUBE_SIZE * j - CUBE_SIZE * 3, FACELET_SIZE, FACELET_SIZE);
+
+                g2.setColor(getColor(CubeCornersUI.getCube()[i + j * 2]));
+                g2.fill(facelet);
+                g2.setColor(Color.BLACK);
+                g2.draw(facelet);
+            }
+        }
+
+        // draw front faces
+        for (int k = 0; k < 4; k++) {
+            for (int i = 0; i < 2; i++) {
+                for (int j = 2; j < 4; j++) {
+                    Rectangle facelet = new Rectangle(CubeCornersUI.WINDOW_WIDTH/2 + CUBE_SIZE * (2*k + i - 4), CubeCornersUI.WINDOW_HEIGHT/2 + CUBE_SIZE * j - CUBE_SIZE * 3, FACELET_SIZE, FACELET_SIZE);
+
+                    g2.setColor(getColor(CubeCornersUI.getCube()[k * 4 + i + j * 2]));
+                    g2.fill(facelet);
+                    g2.setColor(Color.BLACK);
+                    g2.draw(facelet);
+                }
+                
+            }
+        }
+
+        // draw bottom face
+        for (int i = 0; i < 2; i++) {
+            for (int j = 4; j < 6; j++) {
+                Rectangle facelet = new Rectangle(CubeCornersUI.WINDOW_WIDTH/2 + CUBE_SIZE * (i - 2), CubeCornersUI.WINDOW_HEIGHT/2 + CUBE_SIZE * j - CUBE_SIZE * 3, FACELET_SIZE, FACELET_SIZE);
+
+                g2.setColor(getColor(CubeCornersUI.getCube()[i + j * 2 + 12]));
+
+                g2.fill(facelet);
+                g2.setColor(Color.BLACK);
+                g2.draw(facelet);
+            }
+        }
+    }
+
     private void drawCube(Graphics2D g2) {
 
         // draw top face
