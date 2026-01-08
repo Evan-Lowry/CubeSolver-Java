@@ -15,7 +15,7 @@ public class Main {
 
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves("R2 D2 B U L D B' R"); // example scramble
+        cube.performMoves("R2"); // example scramble
         // cube.performMoves("D2 B U R2 D L2 D U2 B2 F2 L2 F2 D' B F' D' L' D' R U B2"); // example scramble
     }
 

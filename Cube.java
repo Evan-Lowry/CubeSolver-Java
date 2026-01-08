@@ -125,16 +125,22 @@ public class Cube {
         switch (i) {
             case 0 -> U();
             case 1 -> Up();
-            case 2 -> D();
-            case 3 -> Dp();
-            case 4 -> L();
-            case 5 -> Lp();
-            case 6 -> R();
-            case 7 -> Rp();
-            case 8 -> F();
-            case 9 -> Fp();
-            case 10 -> B();
-            case 11 -> Bp();
+            case 2 -> U2();
+            case 3 -> D();
+            case 4 -> Dp();
+            case 5 -> D2();
+            case 6 -> L();
+            case 7 -> Lp();
+            case 8 -> L2();
+            case 9 -> R();
+            case 10 -> Rp();
+            case 11 -> R2();
+            case 12 -> F();
+            case 13 -> Fp();
+            case 14 -> F2();
+            case 15 -> B();
+            case 16 -> Bp();
+            case 17 -> B2();
         }
     }
 
@@ -142,64 +148,24 @@ public class Cube {
         switch (i) {
             case 0 -> Up();
             case 1 -> U();
-            case 2 -> Dp();
-            case 3 -> D();
-            case 4 -> Lp();
-            case 5 -> L();
-            case 6 -> Rp();
-            case 7 -> R();
-            case 8 -> Fp();
-            case 9 -> F();
-            case 10 -> Bp();
-            case 11 -> B();
+            case 2 -> U2();
+            case 3 -> Dp();
+            case 4 -> D();
+            case 5 -> D2();
+            case 6 -> Lp();
+            case 7 -> L();
+            case 8 -> L2();
+            case 9 -> Rp();
+            case 10 -> R();
+            case 11 -> R2();
+            case 12 -> Fp();
+            case 13 -> F();
+            case 14 -> F2();
+            case 15 -> Bp();
+            case 16 -> B();
+            case 17 -> B2();
         }
     }
-
-    // public void applyMove(int i) {
-    //     switch (i) {
-    //         case 0 -> U();
-    //         case 1 -> Up();
-    //         case 2 -> U2();
-    //         case 3 -> D();
-    //         case 4 -> Dp();
-    //         case 5 -> D2();
-    //         case 6 -> L();
-    //         case 7 -> Lp();
-    //         case 8 -> L2();
-    //         case 9 -> R();
-    //         case 10 -> Rp();
-    //         case 11 -> R2();
-    //         case 12 -> F();
-    //         case 13 -> Fp();
-    //         case 14 -> F2();
-    //         case 15 -> B();
-    //         case 16 -> Bp();
-    //         case 17 -> B2();
-    //     }
-    // }
-
-    // public void undoMove(int i) {
-    //     switch (i) {
-    //         case 0 -> Up();
-    //         case 1 -> U();
-    //         case 2 -> U2();
-    //         case 3 -> Dp();
-    //         case 4 -> D();
-    //         case 5 -> D2();
-    //         case 6 -> Lp();
-    //         case 7 -> L();
-    //         case 8 -> L2();
-    //         case 9 -> Rp();
-    //         case 10 -> R();
-    //         case 11 -> R2();
-    //         case 12 -> Fp();
-    //         case 13 -> F();
-    //         case 14 -> F2();
-    //         case 15 -> Bp();
-    //         case 16 -> B();
-    //         case 17 -> B2();
-    //     }
-    // }
 
     public void F() {
         // Rotate front face clockwise (two 4-cycles)
