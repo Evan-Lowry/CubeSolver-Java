@@ -69,12 +69,14 @@ public class Drawing {
 
     private void drawCube(Graphics2D g2) {
 
+        byte[] cubeArray = Main.cube.getCube();
+
         // draw top face
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 Rectangle facelet = new Rectangle(CubeUI.WINDOW_WIDTH/2 + CUBE_SIZE * (i - 3), CubeUI.WINDOW_HEIGHT/2 + CUBE_SIZE * j - CUBE_SIZE * 9/2, FACELET_SIZE, FACELET_SIZE);
 
-                g2.setColor(getColor(CubeUI.getCube()[i + j * 3]));
+                g2.setColor(getColor(cubeArray[i + j * 3]));
                 g2.fill(facelet);
                 g2.setColor(Color.BLACK);
                 g2.draw(facelet);
@@ -87,7 +89,7 @@ public class Drawing {
                 for (int j = 3; j < 6; j++) {
                     Rectangle facelet = new Rectangle(CubeUI.WINDOW_WIDTH/2 + CUBE_SIZE * (3*k + i - 6), CubeUI.WINDOW_HEIGHT/2 + CUBE_SIZE * j - CUBE_SIZE * 9/2, FACELET_SIZE, FACELET_SIZE);
 
-                    g2.setColor(getColor(CubeUI.getCube()[k * 9 + i + j * 3]));
+                    g2.setColor(getColor(cubeArray[k * 9 + i + j * 3]));
                     g2.fill(facelet);
                     g2.setColor(Color.BLACK);
                     g2.draw(facelet);
@@ -101,7 +103,7 @@ public class Drawing {
             for (int j = 6; j < 9; j++) {
                 Rectangle facelet = new Rectangle(CubeUI.WINDOW_WIDTH/2 + CUBE_SIZE * (i - 3), CubeUI.WINDOW_HEIGHT/2 + CUBE_SIZE * j - CUBE_SIZE * 9/2, FACELET_SIZE, FACELET_SIZE);
 
-                g2.setColor(getColor(CubeUI.getCube()[i + j * 3 + 27]));
+                g2.setColor(getColor(cubeArray[i + j * 3 + 27]));
 
                 g2.fill(facelet);
                 g2.setColor(Color.BLACK);

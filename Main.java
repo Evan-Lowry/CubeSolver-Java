@@ -8,6 +8,7 @@ public class Main {
     public static Cube cube;
     public static CubeSolver solver;
     public static Heuristic heuristic;
+    public static int maxDepth = 10;
     public static void main(String[] args) {
         // cube = new Cube();
         // gamePanel = new CubeUI();
@@ -15,7 +16,8 @@ public class Main {
 
         cube = new Cube();
         gamePanel = new CubeUI();
-        cube.performMoves("D2 B U R2 D L2 D U2 B2"); // example scramble
+        // cube.performMoves("L2 F2 D2 U' R2 U F2 D2 U' R2 U' B' L2 R' B' D2 U B2");
+        cube.performMoves("U2 B2 F R2 B L2 R2 D2 B'");
     }
 
     public static void solveCubeCorner() {
@@ -37,21 +39,38 @@ public class Main {
     }
 
     public static void solve() {
-        solver = new CubeSolver();
-        System.out.println("Starting to solve the cube...");
-        long startTime = System.currentTimeMillis();
-        boolean solved = solver.solveAnyCube(cube, 10);
-        long endTime = System.currentTimeMillis();
-        System.out.print("Solving took " + formatTime(endTime - startTime));
-        if (solved) {
-            System.out.println("Total states explored: " + formatNumber(solver.getStateCounter()));
-            System.out.println("Moves taken: " + solver.getMoves());
-        } else {
-            System.out.println("Could not solve the cube within the given depth.");
-        }
-        System.out.println();
+        new Thread(() -> {
+            solver = new CubeSolver();
+            System.out.println("Starting to solve the cube...");
+            long startTime = System.currentTimeMillis();
 
-        CubeUI.refresh();
+            boolean solved = solver.solveCube(cube, maxDepth);
+
+            // Update UI and print results on the EDT
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                CubeUI.refresh();
+            });
+
+            solved = solver.solvePhase2(cube, maxDepth);
+
+            long endTime = System.currentTimeMillis();
+            String timeStr = formatTime(endTime - startTime);
+            long states = solver.getStateCounter();
+            String moves = solver.getMoves();
+
+            System.out.print("Solving took " + timeStr);
+            if (solved) {
+                System.out.println("Total states explored: " + formatNumber(states));
+                System.out.println("Moves taken: " + moves);
+            } else {
+                System.out.println("Could not solve the cube within the given depth.");
+            }
+
+            System.out.println();
+
+            CubeUI.refresh();
+
+        }, "solver-thread").start();
     }
 
     private static String formatNumber(long number) {
