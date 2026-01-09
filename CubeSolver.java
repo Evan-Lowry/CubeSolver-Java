@@ -6,6 +6,8 @@ import java.util.LinkedList;
 public class CubeSolver {
 
     private long stateCounter = 0L;
+    private long currentStateCounter = 0L;
+    private long estimatedStates;
     private IntStack moves = new IntStack();
 
     public long getStateCounter() {
@@ -15,53 +17,18 @@ public class CubeSolver {
     public String getMoves() {
         StringBuilder sb = new StringBuilder();
         String[] faces = {"U", "D", "L", "R", "F", "B"};
-        if (moves.size() == 0) return "";
-
-        // Heuristic: if any move index is >= 12 we assume a 3-moves-per-face encoding
-        int maxVal = 0;
-        for (int k = 0; k < moves.size(); k++) {
-            int v = moves.get(k);
-            if (v > maxVal) maxVal = v;
-        }
-        int movesPerFace = (maxVal >= 12) ? 3 : 2;
-
-        int i = 0;
-        while (i < moves.size()) {
-            int first = moves.get(i);
-            int face = first / movesPerFace; // face index 0..5
-            int j = i;
-            int net = 0; // net quarter-turns clockwise
-
-            // accumulate consecutive moves on the same face
-            while (j < moves.size() && moves.get(j) / movesPerFace == face) {
-                int mv = moves.get(j);
-                if (movesPerFace == 3) {
-                    // mapping: 0 => +1 (clockwise), 1 => -1 (prime), 2 => +2 (double)
-                    int t = mv % 3;
-                    if (t == 0) net += 1;
-                    else if (t == 1) net -= 1;
-                    else net += 2;
-                } else {
-                    // 2-per-face mapping: even => +1, odd => -1
-                    net += (mv % 2 == 0) ? 1 : -1;
-                }
-                j++;
+        for (int i = 0; i < moves.size(); i++) {
+            int mv = moves.get(i);
+            int face = mv / 3; // 0..5
+            int turn = mv % 3; // 0=clockwise,1=counter-clockwise,2=180
+            sb.append(faces[face]);
+            if (turn == 1) {
+                sb.append("'");
+            } else if (turn == 2) {
+                sb.append("2");
             }
-
-            net = ((net % 4) + 4) % 4; // normalize to 0..3
-
-            if (net == 1) {
-                sb.append(faces[face]).append("()");
-            } else if (net == 2) {
-                sb.append(faces[face]).append("2()");
-            } else if (net == 3) {
-                sb.append(faces[face]).append("p()");
-            }
-
-            if (j < moves.size()) sb.append(" ");
-            i = j;
+            sb.append(" ");
         }
-
         return sb.toString().trim();
     }
 
@@ -151,6 +118,8 @@ public class CubeSolver {
 
         for (int depth = 1; depth <= maxDepth; depth++) {
             System.out.println("Trying depth " + depth + "...");
+            this.currentStateCounter = 0L;
+            this.estimatedStates = (long) Math.pow(13.7, depth);
             if (solveCube(cube, depth)) {
                 return true;
             }
@@ -167,21 +136,35 @@ public class CubeSolver {
         if (depth == 0) return false;
 
         // 3. EXPLORE CHOICES: Iterate through all possible moves
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 18; i++) {
 
-            int face = i / 3;
+            int movesSize = moves.size();
 
-            // Avoid immediately reversing the previous move
-            if (moves.size() > 0 && moves.get(moves.size() - 1)/3 == face && moves.get(moves.size() - 1) % 3 + i % 3 == 3) {
-                continue;
-            }
+            if (movesSize > 0) {
+                int face = i / 3;
+                int lastMove = moves.get(movesSize - 1);
+                int lastFace = lastMove / 3;
 
-            if (moves.size() > 0) {
-                int lastFace = moves.get(moves.size() - 1) / 3;
+                // Avoid immediately reversing the previous move
+                if (lastFace == face) {
+                    continue;
+                }
+
                 // If this move is on the face opposite the previous face, enforce a canonical order
                 // to avoid exploring both orders (e.g., L R and R L). Allow only the smaller-face-first.
                 if (lastFace == (face ^ 1) && face > lastFace) {
                     continue;
+                }
+
+                // Avoid creating an alternating two-face cycle like A B A B (e.g., R L R L or R L R' L')
+                if (movesSize >= 3) {
+                    int faceA = moves.get(movesSize - 3) / 3;
+                    int faceB = moves.get(movesSize - 2) / 3;
+                    int faceC = moves.get(movesSize - 1) / 3;
+                    // pattern A B A and trying to play B would create A B A B — skip it
+                    if (faceA == faceC && faceB == face) {
+                        continue;
+                    }
                 }
             }
 
@@ -189,6 +172,13 @@ public class CubeSolver {
             state.applyMove(i);
             moves.push(i);
             stateCounter++;
+            this.currentStateCounter++;
+
+            // if (this.currentStateCounter % 100000000 == 0) {
+            //     String pct = String.format(java.util.Locale.US, "%.2f", (this.currentStateCounter * 100.0) / this.estimatedStates);
+            //     System.out.print("\rProcessed: " + pct + "%"); // '\r' returns to start of line
+            //     System.out.flush();
+            // }
 
             // Continue exploring this path
             // Recurse: Move to the next level
