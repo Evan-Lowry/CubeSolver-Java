@@ -16,8 +16,8 @@ public class Main {
 
         cube = new Cube();
         gamePanel = new CubeUI();
-        // cube.performMoves("L2 F2 D2 U' R2 U F2 D2 U' R2 U' B' L2 R' B' D2 U B2");
-        cube.performMoves("U2 B2 F R2 B L2 R2 D2 B'");
+        cube.performMoves("F2 D2 U' R2 U F2 D2 U' R2 U' B' L2 R' B' D2 U B2");
+        // cube.performMoves("U2 B2 F R2 B L2 R2 D2 B'");
     }
 
     public static void solveCubeCorner() {
@@ -47,11 +47,11 @@ public class Main {
             boolean solved = solver.solveCube(cube, maxDepth);
 
             // Update UI and print results on the EDT
-            javax.swing.SwingUtilities.invokeLater(() -> {
-                CubeUI.refresh();
-            });
+            javax.swing.SwingUtilities.invokeLater(() -> CubeUI.refresh());
 
-            solved = solver.solvePhase2(cube, maxDepth);
+            if (solved) {
+                solved = solver.solvePhase2(cube, maxDepth);
+            }
 
             long endTime = System.currentTimeMillis();
             String timeStr = formatTime(endTime - startTime);

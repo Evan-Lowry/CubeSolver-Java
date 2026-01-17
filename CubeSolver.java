@@ -1,6 +1,7 @@
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class CubeSolver {
@@ -8,6 +9,7 @@ public class CubeSolver {
     private long stateCounter = 0L;
     private long currentStateCounter = 0L;
     private long estimatedStates;
+    private HashSet<String> visitedStates = new HashSet<>();    
     private int currentDepth = 0;
     private IntStack phase1Moves = new IntStack();
     private IntStack phase2Moves = new IntStack();
@@ -48,7 +50,7 @@ public class CubeSolver {
             this.currentStateCounter = 0L;
             this.estimatedStates = (long) Math.pow(7, depth);
             if (solvePhase2Rec(cube, depth)) {
-                System.out.println("\rSolution found at depth " + depth + "  ");
+                System.out.println("\rSolution for phase twofound at depth " + depth + "  ");
                 return true;
             }
             System.out.flush();
@@ -133,7 +135,7 @@ public class CubeSolver {
             this.currentStateCounter = 0L;
             this.estimatedStates = (long) Math.pow(13.7, depth);
             if (solveCubeRec(cube, depth)) {
-                System.out.println("\rSolution found at depth " + depth + "  ");
+                System.out.println("\rSolution for phase one found at depth " + depth + "  ");
                 return true;
             }
             System.out.flush();
@@ -171,10 +173,10 @@ public class CubeSolver {
                 }
 
                 // Avoid creating an alternating two-face cycle like A B A B (e.g., R L R L or R L R' L')
-                if (phase1Moves.size() >= 3) {
-                    int faceA = phase1Moves.get(phase1Moves.size() - 3) / 3;
-                    int faceB = phase1Moves.get(phase1Moves.size() - 2) / 3;
-                    int faceC = phase1Moves.get(phase1Moves.size() - 1) / 3;
+                if (movesSize >= 3) {
+                    int faceA = phase1Moves.get(movesSize - 3) / 3;
+                    int faceB = phase1Moves.get(movesSize - 2) / 3;
+                    int faceC = phase1Moves.get(movesSize - 1) / 3;
                     // pattern A B A and trying to play B would create A B A B — skip it
                     if (faceA == faceC && faceB == face) {
                         continue;
@@ -187,7 +189,7 @@ public class CubeSolver {
             this.phase1Moves.push(i);
             this.stateCounter++;
             this.currentStateCounter++;
-            
+
             // Progress update
             if (this.currentStateCounter % 50000000 == 0) {
                 String pct = String.format(java.util.Locale.US, "%.2f", (this.currentStateCounter * 100.0) / this.estimatedStates);

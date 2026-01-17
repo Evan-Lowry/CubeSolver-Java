@@ -4,8 +4,8 @@ import java.awt.Rectangle;
 
 public class Drawing {
 
-    public static final int CUBE_SIZE = 50;
-    public static final int FACELET_SIZE = CUBE_SIZE - 2;
+    public static final int CUBE_SIZE = 75;
+    public static final int FACELET_SIZE = CUBE_SIZE - 4;
 
     public Drawing() {
     }

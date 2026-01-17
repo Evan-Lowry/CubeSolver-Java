@@ -2,16 +2,10 @@ import java.util.ArrayList;
 
 public class Testing {
     public static void main(String[] args) {
-
-        boolean d = false;
-
-        if (1 != 2) {
-            j += "4";
-        }
-
-        j += "3";
-        System.out.println(j);
-        // testHeuristic();
+        Cube cube = new Cube();
+        cube.performMoves("U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2");
+        String key = CubeKey.encode(cube.getCube());
+        System.out.println("Encoded key: " + key);
     }
 
     private static void testHeuristic() {
