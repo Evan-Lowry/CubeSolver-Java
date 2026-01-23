@@ -45,12 +45,15 @@ public class CubeSolver {
 
     public boolean solvePhase2(Cube cube, int maxDepth) {
 
-        for (int depth = 1; depth <= maxDepth; depth++) {
+        for (int depth = 1; depth <= 2 * maxDepth; depth++) {
             this.currentDepth = depth;
             this.currentStateCounter = 0L;
             this.estimatedStates = (long) Math.pow(7, depth);
             if (solvePhase2Rec(cube, depth)) {
                 System.out.println("\rSolution for phase twofound at depth " + depth + "  ");
+                // AI GENERATED ENHANCEMENT: Send to GUI
+                MessageLog.getInstance().logSuccess("Phase 2 complete at depth " + depth);
+                javax.swing.SwingUtilities.invokeLater(() -> CubeUI3D.refresh());
                 return true;
             }
             System.out.flush();
@@ -108,9 +111,12 @@ public class CubeSolver {
             this.currentStateCounter++;
 
             // Progress update
+            // AI GENERATED ENHANCEMENT: Progress overwrites itself in GUI
             if (this.currentStateCounter % 50000000 == 0) {
                 String pct = String.format(java.util.Locale.US, "%.2f", (this.currentStateCounter * 100.0) / this.estimatedStates);
                 System.out.print("\rDepth: " + this.currentDepth + " Processed: " + pct + "% "); // '\r' returns to start of line
+                MessageLog.getInstance().logSolverProgress("Phase 2 - Depth: " + this.currentDepth + " Progress: " + pct + "%");
+                javax.swing.SwingUtilities.invokeLater(() -> CubeUI3D.refresh());
             }
 
             // Continue exploring this path
@@ -136,6 +142,9 @@ public class CubeSolver {
             this.estimatedStates = (long) Math.pow(13.7, depth);
             if (solveCubeRec(cube, depth)) {
                 System.out.println("\rSolution for phase one found at depth " + depth + "  ");
+                // AI GENERATED ENHANCEMENT: Send to GUI
+                MessageLog.getInstance().logSuccess("Phase 1 complete at depth " + depth);
+                javax.swing.SwingUtilities.invokeLater(() -> CubeUI3D.refresh());
                 return true;
             }
             System.out.flush();
@@ -191,9 +200,12 @@ public class CubeSolver {
             this.currentStateCounter++;
 
             // Progress update
+            // AI GENERATED ENHANCEMENT: Progress overwrites itself in GUI
             if (this.currentStateCounter % 50000000 == 0) {
                 String pct = String.format(java.util.Locale.US, "%.2f", (this.currentStateCounter * 100.0) / this.estimatedStates);
                 System.out.print("\rDepth: " + this.currentDepth + " Processed: " + pct + "% "); // '\r' returns to start of line
+                MessageLog.getInstance().logSolverProgress("Phase 1 - Depth: " + this.currentDepth + " Progress: " + pct + "%");
+                javax.swing.SwingUtilities.invokeLater(() -> CubeUI3D.refresh());
             }
 
             // Continue exploring this path

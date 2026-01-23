@@ -115,4 +115,42 @@ public class Main {
 
     public static void reset() {
     }
+
+    // ========================================
+    // AI GENERATED CODE - solve3D method
+    // Purpose: Solve cube with messages going to MessageLog for 3D UI
+    // ========================================
+    public static void solve3D() {
+        new Thread(() -> {
+            solver = new CubeSolver();
+            MessageLog.getInstance().logSolver("Starting to solve the cube...");
+            long startTime = System.currentTimeMillis();
+
+            boolean solved = solver.solveCube(cube, maxDepth);
+
+            // Update UI
+            javax.swing.SwingUtilities.invokeLater(() -> CubeUI3D.refresh());
+
+            if (solved) {
+                solved = solver.solvePhase2(cube, maxDepth);
+            }
+
+            long endTime = System.currentTimeMillis();
+            String timeStr = formatTime(endTime - startTime);
+            long states = solver.getStateCounter();
+            String moves = solver.getMoves();
+
+            // Log to MessageLog instead of System.out
+            MessageLog.getInstance().logSolver(timeStr.replace("Time taken: ", "").replace("\n", ""));
+            if (solved) {
+                MessageLog.getInstance().logSuccess("States explored: " + formatNumber(states));
+                MessageLog.getInstance().logSuccess("Solution: " + moves);
+            } else {
+                MessageLog.getInstance().logError("Could not solve within depth " + maxDepth);
+            }
+
+            CubeUI3D.refresh();
+
+        }, "solver-thread-3d").start();
+    }
 }

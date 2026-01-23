@@ -18,8 +18,8 @@ public class CubeUI extends JPanel {
     // used to store the resolution of the window measured as a percentage of 1920 x 1080
     static float fullscreen = (float) 0.5;
     // sets the resolution variables in accordance with the fullscreen variables
-    static final int WINDOW_HEIGHT = (int)(550*2);
-    static final int WINDOW_WIDTH = (int)(700*2);
+    static final int WINDOW_HEIGHT = (int)(550);
+    static final int WINDOW_WIDTH = (int)(700);
     // static final int WINDOW_HEIGHT = (int)(fullscreen*956);
     // static final int WINDOW_WIDTH = (int)(fullscreen*1470);
     // creates a KeyHandler to read and store key inputs
