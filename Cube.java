@@ -1,7 +1,7 @@
 public class Cube {
 
     private byte[] cube = new byte[54];
-    byte t;
+    private byte t;
 
     public Cube() {
         for (int i = 0; i < 6; i++) {
@@ -91,6 +91,26 @@ public class Cube {
         if (cube[30] != 1 && cube[30] != 3) return false; // Right face edges
         if (cube[32] != 1 && cube[32] != 3) return false; // Right face edges
 
+        return true;
+    }
+
+    public boolean isCornersSolved() {
+        for (int i = 0; i < 6; i++) {
+            if (cube[i * 9 + 0] != i) return false;
+            if (cube[i * 9 + 2] != i) return false;
+            if (cube[i * 9 + 6] != i) return false;
+            if (cube[i * 9 + 8] != i) return false;
+        }
+        return true;
+    }
+
+    public boolean isCornersOrientated() {
+        for (int i = 0; i < 2; i++) {
+            if (cube[i * 45 + 0] != 0) return false;
+            if (cube[i * 45 + 2] != 0) return false;
+            if (cube[i * 45 + 6] != 0) return false;
+            if (cube[i * 45 + 8] != 0) return false;
+        }
         return true;
     }
 

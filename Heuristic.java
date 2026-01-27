@@ -2,8 +2,10 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,45 +13,162 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Heuristic {
+    private static final int depth = 8; // number of corners
+    private static final int edgeDepth = 12; // number of edges
     // Lookup tables for corner and edge positions
     private ArrayList<byte[]> cubeCornerStates;
-    private long[][] cornerKeys; // store state keys as longs
-    private static final int depth = 8; // number of corners
-    private static final int factorialDepth = factorial(depth); // 8! possible corner positions
-    private static final int pow3 = (int) Math.pow(3, depth - 1); // 3^7 possible corner orientations
-
-    private CubeCorner cubeCorner;
+    private HashMap<Integer, Integer> cornerPositionLookup;
+    private HashMap<Integer, Integer> cornerOrientationLookup;
+    private Cube cube;
     private HashMap<String, Integer> cornerPositionMap;
-
-    public void setCube(CubeCorner cubeCorner) {
-        this.cubeCorner = cubeCorner;
-    }
+    private String cornerPositionLookupFilename = "corner_position_states_lookup.csv";
+    private String cornerOrientationLookupFilename = "corner_orientation_states_lookup.csv";
+    private String edgeOrientationLookupFilename = "edge_orientation_states_lookup.csv";
 
     // Precompute heuristic tables for corners and edges
     public void precomputeTables() {
-        ArrayList<byte[]> cornerStates = new ArrayList<byte[]>();
-        byte[] start = new byte[depth * 2];
-        start[0] = 0;
-        cornerStates.add(start);
-        cornerStates = generateCornerPositions(cornerStates, 1);
-        cornerStates = generateCornerRotations(cornerStates);
-    
-        // try { writeStatesToBinaryFile(cornerStates, "corner_states.bin"); }
-        try { writeStatesToCsvFile(cornerStates, "corner_states_testing.csv"); }
-        catch (IOException e) { e.printStackTrace(); }
-        System.out.println("Precomputed corner states:");
-        System.out.println("Total corner states: " + cornerStates.size());
+        precomputeCornerPositionLookup();
+        precomputeCornerLookup();
+        precomputeEdgeOrientationLookup();
     }
 
-    private String stateToString(byte[] state) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (int i = 0; i < state.length; i++) {
-            if (i > 0) sb.append(", ");
-            sb.append(state[i]);
+    public void precomputeCornerPositionLookup() {
+        // Precompute corner position states
+        ArrayList<byte[]> cornerPositionStates = new ArrayList<byte[]>();
+        byte[] start = new byte[8];
+        start[0] = 0;
+        cornerPositionStates.add(start);
+        cornerPositionStates = generateCornerPositions(cornerPositionStates, 1);
+        try { writeStatesToCsvFile(cornerPositionStates, cornerPositionLookupFilename); }
+        catch (IOException e) { e.printStackTrace(); }
+        System.out.println("Precomputed corner states:");
+        System.out.println("Total corner states: " + cornerPositionStates.size());
+    }
+
+    public void precomputeCornerLookup() {
+        // Precompute corner orientation states
+        ArrayList<byte[]> cornerOrientationStates = new ArrayList<byte[]>();
+        byte[] startOrientation = new byte[8];
+        startOrientation[0] = 0;
+        cornerOrientationStates.add(startOrientation);
+        cornerOrientationStates = generateCornerOrientations(cornerOrientationStates, 1);
+        try { writeStatesToCsvFile(cornerOrientationStates, cornerOrientationLookupFilename); }
+        catch (IOException e) { e.printStackTrace(); }
+        System.out.println("Total corner orientation states: " + cornerOrientationStates.size());
+    }
+
+    public void precomputeEdgeOrientationLookup() {
+        // Precompute edge orientation states
+        ArrayList<byte[]> edgeOrientationStates = new ArrayList<byte[]>();
+        byte[] startOrientation = new byte[12];
+        startOrientation[0] = 0;
+        edgeOrientationStates.add(startOrientation);
+        edgeOrientationStates = generateEdgeOrientations(edgeOrientationStates, 1);
+        try { writeStatesToCsvFile(edgeOrientationStates, edgeOrientationLookupFilename); }
+        catch (IOException e) { e.printStackTrace(); }
+        System.out.println("Total edge orientation states: " + edgeOrientationStates.size());
+    }
+    
+    // Load the precomputed corner lookup table from file
+    public void loadCornerLookup() throws IOException {
+        generateCornerPositionLookup(cornerPositionLookupFilename);
+    }
+    
+    // Get the solution length for a given corner state key
+    public int getCornerSolutionLength(int key) {
+        if (cornerPositionLookup == null) return -1;
+        Integer result = cornerPositionLookup.get(key);
+        return result != null ? result : -1;
+    }
+
+    public int getCornerSolutionLength(byte[] key) {
+        return getCornerSolutionLength(CubeKey.encodePositionByte(key));
+    }
+
+    public void loadCornerOrientationLookup() throws IOException {
+        generateCornerOrientationLookup(cornerOrientationLookupFilename);
+    }
+
+    public int getCornerOrientationSolutionLength(int key) {
+        if (cornerOrientationLookup == null) return -1;
+        Integer result = cornerOrientationLookup.get(key);
+        return result != null ? result : -1;
+    }
+
+    public int getCornerOrientationSolutionLength(byte[] key) {
+        return getCornerOrientationSolutionLength(CubeKey.encodeOrientation(key));
+    }
+    
+    private void generateCornerPositionLookup(String filename) throws IOException {
+        cornerPositionLookup = new HashMap<>();
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            int count = 0;
+            
+            while ((line = br.readLine()) != null) {
+                // Skip empty lines
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                
+                // Split by comma: format is "key,solutionLength"
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    try {
+                        int key = Integer.parseInt(parts[0].trim());
+                        int solutionLength = Integer.parseInt(parts[1].trim());
+                        cornerPositionLookup.put(key, solutionLength);
+                        count++;
+                        
+                        // Print progress every 1 million entries
+                        if (count % 1_000_000 == 0) {
+                            System.out.println("Loaded " + count + " corner states into lookup table");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing line: " + line);
+                    }
+                }
+            }
+            
+            System.out.println("Finished loading corner lookup table: " + count + " entries");
         }
-        sb.append("]");
-        return sb.toString();
+    }
+
+    private void generateCornerOrientationLookup(String filename) throws IOException {
+        cornerOrientationLookup = new HashMap<>();
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            int count = 0;
+            
+            while ((line = br.readLine()) != null) {
+                // Skip empty lines
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                
+                // Split by comma: format is "key,solutionLength"
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    try {
+                        int key = Integer.parseInt(parts[0].trim());
+                        int solutionLength = Integer.parseInt(parts[1].trim());
+                        cornerOrientationLookup.put(key, solutionLength);
+                        count++;
+                        
+                        // Print progress every 1 million entries
+                        if (count % 1_000_000 == 0) {
+                            System.out.println("Loaded " + count + " corner orientation states into lookup table");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error parsing line: " + line);
+                    }
+                }
+            }
+            
+            System.out.println("Finished loading corner orientation lookup table: " + count + " entries");
+        }
     }
 
     private long[][] generateStatesToKeys(ArrayList<byte[]> states) {
@@ -76,58 +195,39 @@ public class Heuristic {
         return keys;
     }
 
-    public void writeStatesToBinaryFile(ArrayList<byte[]> states, String filename) throws IOException {
-        final int rowLen = depth * 3;
-        byte[] stickerArray = new byte[rowLen];
-
-        // large buffer to reduce syscalls
-        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(filename), 1 << 20)) {
-            final int n = states.size();
-            for (int i = 0; i < n; i++) {
-                if ((i % 1_000_000) == 0) System.out.println(String.format("Processed %.2f%% of states.", (100.0 * i) / n));
-                byte[] state = states.get(i);
-                // build sticker row into single buffer (reused)
-                for (int j = 0; j < depth; j++) {
-                    byte cornerIndex = state[j];
-                    byte cornerOrientation = state[j + depth];
-                    stickerArray[j * 3]     = getStickerColor(cornerIndex, cornerOrientation);
-                    stickerArray[j * 3 + 1] = getStickerColor(cornerIndex, (cornerOrientation + 1) % 3);
-                    stickerArray[j * 3 + 2] = getStickerColor(cornerIndex, (cornerOrientation + 2) % 3);
-                }
-                out.write(stickerArray); // write fixed-length row
-            }
-            System.out.println("Processed 100.00% of states.");
-            out.flush();
-        }
-    }
-
     public void writeStatesToCsvFile(ArrayList<byte[]> states, String filename) throws IOException {
         final int rowLen = depth * 3;
         final int n = states.size();
         StringBuilder sb = new StringBuilder(rowLen * 3);
+        Cube cube = new Cube();
+        CubeSolver solver = new CubeSolver();
+        int invalidStates = 0;
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename, StandardCharsets.UTF_8), 1 << 20)) {
             for (int i = 0; i < n; i++) {
-                if ((i % 1_000_000) == 0) System.out.println(String.format("Processed %.2f%% of states.", (100.0 * i) / n));
+                if (i % 100 == 0) System.out.println(String.format("Processed %.2f%% of states.", (100.0 * i) / n));
                 byte[] state = states.get(i);
+                // byte[] cubeArray = CubeKey.indexOrientatedArrayToCube(state);
+                // cube.setCube(cubeArray);
+                // int solutionLength = 15; // default value for invalid states
+                // if (solver.solveCornerOrientation(cube, 14)) {
+                //     solutionLength = solver.getNumberOfMoves();
+                //     solver.reset();
+                // } else {
+                //     invalidStates++;
+                // }
                 sb.setLength(0);
-                for (int j = 0; j < depth; j++) {
-                    byte cornerIndex = state[j];
-                    byte cornerOrientation = state[j + depth];
-                    // append three sticker values
-                    if (j > 0) sb.append(',');
-                    sb.append(getStickerColor(cornerIndex, cornerOrientation)).append(',');
-                    sb.append(getStickerColor(cornerIndex, (cornerOrientation + 1) % 3)).append(',');
-                    sb.append(getStickerColor(cornerIndex, (cornerOrientation + 2) % 3));
-                }
+                sb.append(CubeKey.encodeByteArrayToLong(state));
+                // sb.append(",");
+                // sb.append(solutionLength);
                 bw.write(sb.toString());
                 bw.newLine();
             }
             System.out.println("Processed 100.00% of states.");
             bw.flush();
         }
+        catch (IOException e) { e.printStackTrace(); }
     }
-
 
     private byte getStickerColor(byte cornerIndex, int stickerPosition) {
         // Define the color mapping for each corner and its stickers
@@ -163,6 +263,67 @@ public class Heuristic {
         return generateCornerPositions(newStates, index + 1);
     }
 
+    private ArrayList<byte[]> generateCornerOrientations(ArrayList<byte[]> currentStates, int index) {
+        ArrayList<byte[]> newStates = new ArrayList<byte[]>();
+        for (byte[] byteStack : currentStates) {
+            byte[] tempStack;
+
+            for (int i = 0; i < 3; i++) {
+                tempStack = byteStack.clone();
+                tempStack[index - 1] = (byte) i;
+                newStates.add(tempStack);
+            }
+        }
+        if (index == depth - 1) {
+            for (byte[] state : newStates) {
+                int sumOfOrientations = 0;
+                for (int i = 0; i < depth - 1; i++) {
+                    sumOfOrientations += state[i];
+                }
+                state[depth - 1] = (byte) ((3 - (sumOfOrientations % 3)) % 3);
+            }
+            return newStates;
+        }
+        return generateCornerOrientations(newStates, index + 1);
+    }
+
+    private ArrayList<byte[]> generateEdgeOrientations(ArrayList<byte[]> currentStates, int index) {
+        ArrayList<byte[]> newStates = new ArrayList<byte[]>();
+        for (byte[] byteStack : currentStates) {
+            byte[] tempStack;
+            for (int i = 0; i < 2; i++) {
+                tempStack = byteStack.clone();
+                tempStack[index - 1] = (byte) i;
+                newStates.add(tempStack);
+            }
+        }
+        if (index == edgeDepth - 1) {
+            for (byte[] state : newStates) {
+                int sumOfOrientations = 0;
+                for (int i = 0; i < depth - 1; i++) {
+                    sumOfOrientations += state[i];
+                }
+                state[edgeDepth - 1] = (byte) ((2 - (sumOfOrientations % 2)) % 2);
+            }
+            return newStates;
+        }
+        return generateEdgeOrientations(newStates, index + 1);
+    }
+
+    private static int factorial(int n) {
+        if (n <= 1) return 1;
+        return n * factorial(n - 1);
+    }
+    
+    // must have index within bounds of array
+    private void insert(byte[] array, int index, byte value) {
+        if (index < 0 || index >= array.length) throw new IndexOutOfBoundsException(index);
+        for (int i = array.length - 1; i > index; i--) {
+            array[i] = array[i - 1];
+        }
+        array[index] = value;
+    }
+
     private ArrayList<byte[]> generateCornerRotations(ArrayList<byte[]> currentStates) {
         int pow3 = 1;
         for (int k = 0; k < depth - 1; k++) pow3 *= 3; // integer power for the first depth-1 corners
@@ -189,52 +350,4 @@ public class Heuristic {
         return newStates;
     }
 
-    private void generateCornerLookup(CubeCorner cubeCorner, int depth) {
-        // Recursive or iterative logic to generate corner permutations
-
-        // Base case: all corners generated
-        if (depth == 8) return;
-
-        for (int i = 0; i < 12; i++) {
-            cubeCorner.applyMove(i);
-            // Generate permutations for the current corner
-            cubeCorner.setCornerPosition(depth, i);
-            generateCornerLookup(cubeCorner, depth + 1);
-
-
-            cubeCorner.undoMove(i);
-        }
-    }
-
-    private void createEdgeLookupTable() {
-        // Logic to create a lookup table for edge positions
-        for (int i = 0; i < 12; i++) {
-            // Generate all possible edge permutations
-            generateEdgePermutations(i);
-        }
-    }
-
-    private void generateEdgePermutations(int index) {
-        // Recursive or iterative logic to generate edge permutations
-        if (index == 12) {
-            // Base case: all edges generated
-            return;
-        }
-        // Generate permutations for the current edge
-        generateEdgePermutations(index + 1);
-    }
-
-    private static int factorial(int n) {
-        if (n <= 1) return 1;
-        return n * factorial(n - 1);
-    }
-
-    // must have index within bounds of array
-    private void insert(byte[] array, int index, byte value) {
-        if (index < 0 || index >= array.length) throw new IndexOutOfBoundsException(index);
-        for (int i = array.length - 1; i > index; i--) {
-            array[i] = array[i - 1];
-        }
-        array[index] = value;
-    }
 }

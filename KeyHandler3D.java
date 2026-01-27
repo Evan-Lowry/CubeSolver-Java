@@ -42,7 +42,7 @@ public class KeyHandler3D implements KeyListener {
             }
             case ' ' -> {
                 MessageLog.getInstance().logSolver("Starting solve...");
-                Main.solve3D();
+                Main3D.solve3D();
             }
             case 'q' -> CubeUI3D.exit();
             case '1' -> CubeUI3D.performMoves("U2");

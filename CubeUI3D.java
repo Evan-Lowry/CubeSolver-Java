@@ -67,7 +67,7 @@ public class CubeUI3D extends JPanel {
         SwingUtilities.invokeLater(() -> {
             if (frame == null) {
                 CubeUI3D ui = new CubeUI3D();
-                frame = new JFrame("Cube Solver - 3D View (AI Generated)");
+                frame = new JFrame("Cube Solver - 3D View");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setContentPane(ui);
                 frame.pack();

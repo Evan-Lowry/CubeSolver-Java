@@ -130,7 +130,7 @@ public class Drawing3D {
                 double x = 1.0 - col; // Right to left (reversed)
                 double y = 1.5 - row;
                 
-                int index = 17 - row * 3 - col;
+                int index = 27 + (2 - row) * 3 + (2 - col);
                 // Back face is partially hidden, draw with slight transparency
                 drawIsometricSquare(g2, x, y, baseZ, getColor(cube[index]), false);
             }
@@ -146,7 +146,7 @@ public class Drawing3D {
                 double x = col - 1.0;
                 double y = 1.5 - row; // Top to bottom
                 
-                int index = 27 + row * 3 + col;
+                int index = 17 - row * 3 - col;
                 drawIsometricSquare(g2, x, y, baseZ, getColor(cube[index]), false);
             }
         }
@@ -161,7 +161,7 @@ public class Drawing3D {
                 double z = col - 1.0;
                 double y = 1.5 - row;
                 
-                int index = 36 + row * 3 + col;
+                int index = 36 + (2 - row) * 3 + col;
                 drawIsometricSquare(g2, baseX, y, z, getColor(cube[index]), false);
             }
         }
@@ -176,7 +176,7 @@ public class Drawing3D {
                 double x = col - 1.0;
                 double z = 1.0 - row; // Front to back
                 
-                int index = 45 + row * 3 + col;
+                int index = 45 + row + col * 3;
                 drawIsometricSquare(g2, x, baseY, z, getColor(cube[index]), true);
             }
         }
@@ -317,7 +317,7 @@ public class Drawing3D {
                 currentLine = new StringBuilder(firstLine ? "  " : "  ");
                 currentLine.append(word);
                 firstLine = false;
-                prefix = " ";
+                prefix = "  ";  // Reset prefix to match continuation line indentation
             }
         }
         

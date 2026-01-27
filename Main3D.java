@@ -5,6 +5,8 @@
 // Usage: Run this instead of Main.java to use the 3D visualization
 // ========================================
 
+import java.io.IOException;
+
 public class Main3D {
 
     public static CubeUI3D gamePanel3D;
@@ -15,11 +17,19 @@ public class Main3D {
     
     public static void main(String[] args) {
         cube = new Cube();
-        Main.cube = cube; // AI GENERATED FIX: Set Main.cube so it works with existing pattern
         gamePanel3D = new CubeUI3D();
-        
+        heuristic = new Heuristic();
+        try {
+            heuristic.loadCornerLookup();
+            heuristic.loadCornerOrientationLookup();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // Example scramble
-        // cube.performMoves("F2 D2 U' R2 U F2 D2 U' R2 U' B' L2 R' B' D2 U B2");
+        String scramble = "F2 D2 U' R2 U F2 D2 U' R2 U' B' L2 R' B' D2 U B2";
+        // String scramble = "U R2 F B R B2 R U2 L B2 R U' D' R2 F R' L B2 U2 F2"; // Superflip
+        cube.performMoves(scramble);
+        MessageLog.getInstance().logInfo("Scramble: " + scramble);
         
         // Log initial state to message log
         MessageLog.getInstance().logInfo("Cube scrambled and ready!");
@@ -74,6 +84,7 @@ public class Main3D {
             MessageLog.getInstance().logSolver(timeStr.replace("Time taken: ", "").replace("\n", ""));
             if (solved) {
                 MessageLog.getInstance().logSuccess("States explored: " + formatNumber(states));
+                MessageLog.getInstance().logSuccess("Pruned states: " + formatNumber(solver.getDisqualifiedStates()));
                 MessageLog.getInstance().logSuccess("Solution: " + moves);
             } else {
                 MessageLog.getInstance().logError("Could not solve within depth " + maxDepth);

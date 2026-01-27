@@ -20,24 +20,6 @@ public class Main {
         // cube.performMoves("U2 B2 F R2 B L2 R2 D2 B'");
     }
 
-    public static void solveCubeCorner() {
-        solver = new CubeSolver();
-        System.out.println("Starting to solve the cube corners...");
-        long startTime = System.currentTimeMillis();
-        boolean solved = solver.solveAnyCubeCorners(cube, 11);
-        long endTime = System.currentTimeMillis();
-        System.out.print("Solving took " + formatTime(endTime - startTime));
-        if (solved) {
-            System.out.println("Total states explored: " + formatNumber(solver.getStateCounter()));
-            System.out.println("Moves taken: " + solver.getMoves());
-        } else {
-            System.out.println("Could not solve the cube within the given depth.");
-        }
-        System.out.println();
-
-        CubeCornersUI.refresh();
-    }
-
     public static void solve() {
         new Thread(() -> {
             solver = new CubeSolver();
